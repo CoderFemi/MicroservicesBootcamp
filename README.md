@@ -86,5 +86,36 @@ Rather than using the image id to start up a container, the convention is to **t
 A docker image can also be manually generated using the command line instead of a dockerfile, using the `docker commit` command.
 <!-- docker commit -c "CMD 'redis-server'" CONTAINERID -->
 
+### KUBERNETES
+Kubernetes is a container management system.
+- Cluster: A kubernetes cluster is a collection of nodes one of which is a master that manages all the other nodes.
+- Node: A node is a virtual machine that runs the containers.
+- Pod: A pod is a running container. A pod encapsulates/wraps a container, and can contain more than one container. However when it runs only one container, it can simply be referred to as a container or pod.
+- Deployment: This is code that monitors a set of pods, ensuring they are always up and running.
+- Service: A service is a url that makes it easy to access containers. It is what enables communication between the containers. An event bus which needs to emit an event to a container, will do so through the service.
+- Config File: Kubernetes config files specify the different deployments, pods and services - technically known as `objects` - that need to be created. Config files are written in YAML format and provide documentation about the clusters that are running; therefore they should be stored along with source code in the repository. It is possible to run commands in the terminal to create objects directly without config files, but *it is not recommended to do this*.
 
-<!-- 192.168.99.100:8080 -->
+#### Kubernetes Workflow
+When an image is run through docker and then sent off to kubernetes, the cluster master runs the config file which specifies the number of nodes to run and the level of network connectivity for each of them i.e. if they are to be accessible from outside the cluster. The nodes are created, and the containers/pods are started up within those nodes, and monitored by the deployment code.
+
+**Creating a pod**
+In the YAML file, the following is the code required for creating a pod:
+
+```
+apiVersion: <version>  // This specifies what version to pull the object (pod) from. Kubernetes has different API versions for built-in objects
+kind: <object>          // Here we specify what kind of object we want to create, in this case, a pod.
+metadata:
+  name: <objectName>    // This is just a name used to identify the object. Note that the indent on the second line must be observed, with just two spaces, or else it will generate an error.
+spec:                   // The attributes to be applied to the object about to be created.
+  containers:           // Many containers can be created in a pod
+  - name: <containerName>
+    image: <dockerUsername/imageName:version> // Note that a specific version (i.e. 0.0.1) must be appended to the image name so that the image is retrieved from the file system. Or else it will default to 'latest' and docker will go to try and retrieve it from dockerhub.
+
+```
+**Kubernetes CLI commands**
+- `kubectl apply -f <configFilename>` // Run config file and create object(s) specified within it.
+- `kubectl describe pod <podName>` // Get detailed info about a running pod.
+- `kubectl get pods` // Get a list of all running pods 
+- `kubectl exec it <podName> <command>` // Run a command directly in the pod e.g. open up a shell (sh)
+- `kubectl logs <podName>` // Show logs for a pod
+- `kubectl delete pod <podName>` // Delete a pod
