@@ -42,8 +42,8 @@ At the end of building the mini-blog app, the architecture employed was sufficie
 Two very important tools, Docker and Kubernetes offer scalability and automation to programs.
 
 ### Docker
-- `Docker` is a tool that makes it easy to install programs without worrying about dependencies and setup. It makes use of the containerisation system to install programs. The Docker Client (CLI) is used to issue commands and interact with the program. The Docker Server (Daemon) is the actual software that creates images, runs and manages containers.
-- An `image` is a single file (file system snapshot) containing all the dependencies and configuration (startup command etc.) that a program needs to run.
+- `Docker` is a tool (container runtime) that is responsible for running containers and makes it easy to install programs without worrying about dependencies and setup. It makes use of the containerisation system to install programs. The Docker Client (CLI) is used to issue commands and interact with the program. The Docker Server (Daemon) is the actual software that creates images, runs and manages containers.
+- An `image` is a single file (file system snapshot) containing all the code, dependencies and configuration (startup command etc.) that a program needs to run. In other words, a ready-to-run software package containing everything needed to run an application.
 - A `container` is an instance of an image deployed on a virtual machine that has its own independent hardware resources such as memory, networking and storage.
 
 To understand how a container works, it is important to know how system programs interact with the underlying hardware. System programs make system calls to the operating system's `kernel` which then provides access to hardware resources such as disk space, memory etc. If a certain program needs a different version of a dependency to run, than what is already available on the system, a segment of the hard disk will be dedicated to store that different version separate from the other version, so different versions of the same dependency can run on the same system. Two methods are used to create this segmentation: `namespacing` and `control groups`. Namespacing isolates processes from accessing certain hardware resources (disk space), and control grouping restricts the amount of the hardware resource (e.g. memory, cpu usage, bandwidth) that the process can use. *Namespacing and control-grouping are features only available on the Linux operating system*. Therefore, when docker is installed, linux is also installed on a virtual machine on the system. It is the linux kernel, not the Windows or MacOS kernel, that carries out containerisation.
@@ -57,6 +57,7 @@ When an instance of an image is created, the kernel isolates a segment of the ha
 - `docker run <imageName> <alternateCommand>` : When an alternate command is provided, it overrides and replaces the default startup command which is run when the container is created. Note that the command will only run if the executable file is present in the container's code.
 - `docker ps` : This shows a list of all running containers with information like the id, time running, name etc. Adding the flag `--all` shows all the containers that have ever been created.
 - `docker create <imageName>` : This command creates a container and prints the id in the terminal.
+- `docker push <imageName>` : This pushes the image to Dockerhub.
 - `docker start <containerId>` : This starts up the container. To print information about the container's running process in the terminal the `-a` flag is used.
 - `docker stop <containerId>`: This stops the container after 10 seconds, giving it time to shut down its processes. If it doesn't stop after the delay, `docker kill` automatically runs to shut down the container immediately.
 - `docker logs <containerId>` : Shows all records of logs that have been emitted from the container.
@@ -91,31 +92,86 @@ Kubernetes is a container management system.
 - Cluster: A kubernetes cluster is a collection of nodes one of which is a master that manages all the other nodes.
 - Node: A node is a virtual machine that runs the containers.
 - Pod: A pod is a running container. A pod encapsulates/wraps a container, and can contain more than one container. However when it runs only one container, it can simply be referred to as a container or pod.
-- Deployment: This is code that monitors a set of pods, ensuring they are always up and running.
-- Service: A service is a url that makes it easy to access containers. It is what enables communication between the containers. An event bus which needs to emit an event to a container, will do so through the service.
-- Config File: Kubernetes config files specify the different deployments, pods and services - technically known as `objects` - that need to be created. Config files are written in YAML format and provide documentation about the clusters that are running; therefore they should be stored along with source code in the repository. It is possible to run commands in the terminal to create objects directly without config files, but *it is not recommended to do this*.
+- Deployment: This is code that monitors a set of pods, ensuring they are always up and running. These pods are identical in nature, have the same configuration and run the same containers. The deployment manager also manages upgrades by creating new pods running the new app version and deleting the previous pods running the old version.
+- Service: A service is a url that makes it easy to access pods. It is what enables communication between the pods. An event bus which needs to emit an event to a pod, will do so through the service. In other words, a cluster service provides networking between pods.
+- Config File: Kubernetes config files specify the different deployments, pods and services - technically known as `objects` - that need to be created. Config files are written in YAML format and provide documentation about the clusters that are running; therefore they should be stored along with source code in the repository. It is possible to run commands in the terminal to create objects directly without config files, but *it is not recommended to do this*. A single config file can deploy more than one object, they are separated by three dashes `---` on a single line. Deployment objects are usually deployed along with their corresponding Service objects.
 
-#### Kubernetes Workflow
 When an image is run through docker and then sent off to kubernetes, the cluster master runs the config file which specifies the number of nodes to run and the level of network connectivity for each of them i.e. if they are to be accessible from outside the cluster. The nodes are created, and the containers/pods are started up within those nodes, and monitored by the deployment code.
 
-**Creating a pod**
+#### Creating a Pod
+
 In the YAML file, the following is the code required for creating a pod:
 
 ```
-apiVersion: <version>  // This specifies what version to pull the object (pod) from. Kubernetes has different API versions for built-in objects
-kind: <object>          // Here we specify what kind of object we want to create, in this case, a pod.
+apiVersion: <version>  // This specifies what version - e.g. v1 - to pull the object (pod) from. Kubernetes has different API versions for built-in objects
+kind: Pod          // Here we specify what kind of object we want to create, in this case, a Pod (title case).
 metadata:
-  name: <objectName>    // This is just a name used to identify the object. Note that the indent on the second line must be observed, with just two spaces, or else it will generate an error.
+  name: <podName>    // This is just a name used to identify the object. Note that the indent on the second line must be observed, with just two spaces, or else it will generate an error.
 spec:                   // The attributes to be applied to the object about to be created.
-  containers:           // Many containers can be created in a pod
-  - name: <containerName>
-    image: <dockerUsername/imageName:version> // Note that a specific version (i.e. 0.0.1) must be appended to the image name so that the image is retrieved from the file system. Or else it will default to 'latest' and docker will go to try and retrieve it from dockerhub.
+  containers:           // Many containers can be created in a pod. So this signifies the start of an array.
+  - name: <containerName> // The dash/hyphen in front signifies an item in the array. i.e. one container out of many.
+    image: <dockerUsername/imageName:version> // Note that a specific version (i.e. 0.0.1) must be appended to the image name so that the image is retrieved from the file system. Or else it will default to 'latest' and docker will go to retrieve it from dockerhub. This last scenario happens when the image has been upgraded to a new version after an app upgrade. (The best way to handle app upgrades.) The image is pushed to Dockerhub, and there is no need to change the version in the config file, since no version has been specified, it defaults to latest and it is retrieved from Dockerhub and deployed.
 
 ```
-**Kubernetes CLI commands**
-- `kubectl apply -f <configFilename>` // Run config file and create object(s) specified within it.
-- `kubectl describe pod <podName>` // Get detailed info about a running pod.
-- `kubectl get pods` // Get a list of all running pods 
+
+#### Creating a Deployment
+
+Using a deployment to manage pods is best practice and easier, rather than using the above method to create individual pods. In the YAML file (file name should be suffixed with 'depl'), the following is the code required for creating a deployment:
+
+```
+apiVersion: <apps/version>  // This specifies what version to pull the object (deployment) from. Kubernetes has different API versions for built-in objects.
+kind: Deployment          // Here we specify what kind of object we want to create, in this case, a Deployment (title case).
+metadata:
+  name: <deploymentName-depl>    // This is just a name used to identify the object. It must be suffixed with 'depl' to indicate it's a deployment. This helps when going through logs, to differentiate objects faster. Note that the indent on the second line must be observed, or else it will generate an error.
+spec:                   // The attributes to be applied to the object about to be created.
+  replicas: <number>    // The number of pods to be started up.
+  selector:           // To help identify which pods are being managed by the deployment, by matching labels.
+    matchLabels:
+      <labelName>:<label> // E.g. app: posts
+  template:         // Configuration information
+    metadata:
+      labels:
+        <labelName>:<label>
+    spec:
+      containers:
+        - name: <containerName>
+        image: <dockerUsername/imageName:version> // Note that a specific version (i.e. 0.0.1) must be appended to the image name so that the image is retrieved from the file system. Or else it will default to 'latest' and docker will go to try and retrieve it from dockerhub.
+
+```
+
+#### Creating a Cluster Service
+Types of Services:
+* Cluster IP: Sets up a url through which a pod can be accessed, only by other pods in its cluster.
+* Node Port: This makes a pod accessible from outside the cluster. This type of service is mainly for development purposes.
+* Load Balancer: This service makes a pod accessible from outside the cluster. This type is for production, as it  manages incoming traffic and redirects to the pods in the cluster. In reality, the load balancer service uses a cloud provider's load balancer to direct traffic to an ingress controller which handles routing of requests to the ClusterIps of each pod in the cluster.
+* External Name: This redirects in-cluster requests to a CNAME url.
+
+In the YAML file (file name should be suffixed with 'srv'), the following is the code required for creating a service:
+
+```
+apiVersion: <version>  // This specifies what version - e.g. v1 - to pull the object (deployment) from. Kubernetes has different API versions for built-in objects.
+kind: Service          // Here we specify what kind of object we want to create, in this case, a Service (title case).
+metadata:
+  name: <serviceName-srv>    // This is just a name used to identify the object. It must be suffixed with 'srv' to indicate it's a service. This helps when going through logs, to differentiate objects faster. Note that the indent on the second line must be observed, or else it will generate an error.
+spec:                   // The attributes to be applied to the object about to be created.
+  type: <ServiceType>   // The type of service to be created (title-cased). If not defined, it will default to a type of ClusterIP, which will be created.
+  selector:           // To help identify which pods should be monitored by the service, by matching labels.
+    <labelName>:<label> // E.g. app: posts
+  ports:              // Port configuration information
+    - name: <portName>
+      protocol: TCP
+      port: <port>        // Port on which the service should listen for events.
+      targetPort: <port>  // Port on which the pod is listening for events.
+
+```
+When a NodePort service is created, a port, usually in the range 30000 - 32000, is assigned randomly to the node, on which the node listens for traffic from the outside world i.e. the port which you type in the browser. This can be located by running the get services or describe service command. *Note that all these ports are just for development environments.*
+
+#### Kubernetes CLI commands
+
+- `kubectl apply -f <configFilename>` // Run config file and create object(s) specified within it. A dot instead of the configFilename, means all the deployments in the current directory will be executed i.e. `kubectl apply -f .`
+- `kubectl describe <object> <objectName>` // Get detailed info about a running object.
+- `kubectl get <objects>` // Get a list of all running objects 
 - `kubectl exec it <podName> <command>` // Run a command directly in the pod e.g. open up a shell (sh)
 - `kubectl logs <podName>` // Show logs for a pod
-- `kubectl delete pod <podName>` // Delete a pod
+- `kubectl delete <object> <objectName>` // Delete an object
+- `kubectl rollout restart deployment <deploymentName>` // This restarts a deployment using an updated image (new version) pulled from dockerhub.

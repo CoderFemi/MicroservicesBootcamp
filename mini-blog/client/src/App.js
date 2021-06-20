@@ -1,6 +1,6 @@
-import React from "react"
-import PostCreate from "./PostCreate"
-import PostList from "./PostList"
+import React from "react";
+import PostCreate from "./PostCreate";
+import PostList from "./PostList";
 
 const App = () => {
   return (
@@ -11,6 +11,6 @@ const App = () => {
       <h1>Posts</h1>
       <PostList />
     </div>
-  )
-}
-export default App
+  );
+};
+export default App;
