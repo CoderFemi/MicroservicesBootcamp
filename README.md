@@ -175,3 +175,145 @@ When a NodePort service is created, a port, usually in the range 30000 - 32000, 
 - `kubectl logs <podName>` // Show logs for a pod
 - `kubectl delete <object> <objectName>` // Delete an object
 - `kubectl rollout restart deployment <deploymentName>` // This restarts a deployment using an updated image (new version) pulled from dockerhub.
+
+
+## TYPESCRIPT
+Typescript is a type system. It is just plain javascript, with additional syntax (type annotations) to help catch errors during development. During development, it constantly analyses our code realtime and points out any errors. Saves time, because we do not have to wait till we run our code before detecting any errors. The type system is only active during development; when compiled for production, it is just plain javascript. Typescript files have the `ts` file extension.
+
+It is installed via an npm library - `typescript`. A companion compiler `ts-node` compiles typescript files to javascript.
+
+## Types
+Typescript uses the primitive and object types available in Javascript. There are other additional primitive types in TS: `void`, `symbol` and `any`. 'Any' is returned by typescript when it cannot infer the result of certain methods such as JSON.parse() because what the method returns depends on the string that is passed in as an argument.
+
+### Type Annotation vs Type Inference
+
+#### Variables
+Type annotation is the additional code included by us in javascript to set up which types we are referring to. For example to declare a variable, a colon and the type are included. `const age: number = 28`. Here, the type annotation is the colon followed by the type, number. Also to add a TA for an array of strings would be `let names: string[] = ['John', 'Mary']`.
+
+On the other hand, with type inference, TS guesses the type of the variable based on what was assigned to it on initialisation. Typescript can only infer when the variable is both declared and initialised on one line. Therefore, there is no need to add any annotations. We only need to add annotations in the following three scenarios:
+* When a variable is declared on one line and initialised later on another.
+* When the type of the variable cannot be inferred correctly. E.g. when we assign a boolean to a variable but later need to assign it a value of number. Here TS cannot infer that the type could be more than one. So we need to add in an annotation that specifies the type as `:boolean | number`
+* When a method returns the 'any' type and we need to clarify the value e.g. JSON.parse().
+
+#### Functions
+For functions, we add type annotation to tell TS the type of arguments that are being passed into and the type of value returned from the function. TS can infer what value is returned from the function, so annotation may not be required for a return value. It cannot infer what arguments are being passed in. *It is however recommended to always use a return annotation to enable TS detect when a mistake is made and no return statement is declared.* When no return statement is declared and there is no return annotation, TS will simply infer a type of 'void' for the return value and raise no errors. If we deliberately intend not to return anything from the function, then a return annotation of `void` is required. If we are never going to return anything from the function then we annotate with `never`.
+
+```
+// Will return a number
+const add = (a: number, b: number): number => {
+  return a + b
+}
+
+// Will return nothing
+const add = (a: number, b: number): void => {
+  console.log(a + b)
+}
+
+// Will never return anything
+const errorMessage = (message: string): never => {
+  throw new Error(message)
+}
+
+```
+
+To provide type annotation for nested variables we use the following syntax:
+```
+const person = {
+  name: 'Peter',
+  age: 29
+}
+const greeting = (person: {name: string, age: number}) => {
+  console.log(`Hi, my name is ${person.name} and I am ${person.age} years old.`)
+}
+
+// Destructuring arguments
+const greeting = ({name, age}: {name: string, age: number}) => {
+  console.log(`Hi, my name is ${name} and I am ${age} years old.`)
+}
+
+```
+
+#### Objects
+Object destructuring is done as also seen above when destructuring arguments.
+```
+const {name, age}: {name: string, age: number} = person
+
+```
+
+#### Array
+Types in arrays can be annotated or inferred. A one-level array of strings is annotated as `const array = string[]`, while a two-dimensional array will have the annotation `const array = string[][]`. To declare an array with flexible types, a type annotation using the pipe operator is added to indicate more than one type of value for the array e.g. `const array = (string | number)[]`
+
+TS provides a lot of benefits when working with arrays:
+- It can provide inference when pulling items from an array. The item accessed will have the same type as what was annotated/inferred for the whole array.
+- TS can also prevent incompatible elements from being added to an array e.g. trying to add a number to an array of strings.
+
+#### Tuples
+A tuple is essentially an array, with different types of items, but with a specific order to those items. It is used instead of an object to track key-value pairs. But only the values are stored in the tuple, in a specific order which cannot be disarrayed.
+
+They are not that popular due to the fact that there is obviously a loss of information. Without the keys, it would be difficult to decipher what the values represent.
+
+```
+// Object with key-value pairs
+const person1 = {
+  name: 'Parker',
+  age: 29,
+  alive: true
+  greeting(): string {
+    return `Hi, I'm ${this.name} and I am ${this.age} years old.`
+  }
+}
+
+// A tuple showing the same information
+const person1: [string, number, boolean] = ['Parker', 29, true]
+
+// Tuple implemented with an alias
+type Bio = [string, number, boolean] // alias
+const person1: Bio = ['Parker', 29, true]
+
+```
+#### Interfaces
+An interface is used to create a new type that makes it easier to annotate object properties. It is particularly useful when creating reusable, generic functions that use one interface to annotate similar properties or methods of different objects.
+
+```
+interface Person = {
+  name: string,
+  age: number,
+  alive: boolean
+  greeting(): string // A method with no arguments that returns a string
+}
+
+const printGreeting = (person1: Person): void => {
+  console.log(person1.greeting())
+}
+
+```
+
+#### Classes
+Typescript uses the modifiers public, private and protected on methods to detect errors in code. A method with no modifier is public by default. A private method can only be accessed by other methods within the same class, while a protected method can only be accessed by other methods in the same class as well as child classes.
+
+The public keyword can also be useful in TS for defining a property in the constructor function.
+
+```
+// Traditional property definition
+class Vehicle {
+  model: string
+  mileage: number
+  constructor(model: string, mileage: number) {
+    this.model = model
+  }
+}
+
+// Property definition with public keyword
+class Vehicle {
+  constructor(public model: string, mileage: number) {}
+}
+
+const car = new Vehicle('Toyota', 5200)
+
+```
+The combination of interfaces and classes provide the reusability of code in Typescript.
+
+### Modules and Typescript
+* **Type Declaration Files**: When using an npm module, it is important to check if it has a type declaration file. The import statement will show an error if there is none. Type declaration files are usually downloadable as npm modules in the form `@types/<moduleName>`. The type declaration file usually shows a lot of information about the type annotations for all the methods and properties available in the module. The same thing is applicable for modules imported with html script tags. For instance, using the Google maps API script tag creates a global namespace in our project, but Typescript cannot recognise it until the type declaration file for it is installed.
+* **Default vs Named Exports**: It is a commonly accepted convention by Typescript developers to only use named exports and not default exports. Sticking to only one type of export reduces the likelihood of generating an error.
+
