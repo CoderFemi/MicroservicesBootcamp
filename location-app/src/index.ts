@@ -1,9 +1,10 @@
 import { User } from './User'
 import { Company } from './Company'
+import { CustomMap } from './CustomMap'
 
-const userOne = new User
-console.log(userOne)
-const companyOne = new Company
-console.log(companyOne)
+const user = new User
+const company = new Company
+const customMap = new CustomMap('map')
 
-google
+customMap.addMarker(user)
+customMap.addMarker(company)
