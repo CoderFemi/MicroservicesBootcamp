@@ -80,7 +80,7 @@ The dockerfile format is `Dockerfile`, capitalised first letter and with no file
 - `COPY` : Another dockerfile command that is vital is the `COPY` command. In some situations one would need to make configuration files available to the temporary containers during the build process. This is because the containers only have access to a specific segment of the system hard drive. Therefore we use the `COPY <systemFilePathToCopyFrom> <containerFilePathToCopyTo>`, and this is usually the root directories of the project therefore would be `COPY ./ ./`. The 'copy' command needs to come before the 'run' command so that the configuration files are available for the run command to make reference to. *Also note that the copy command as well as it's position in the file can be modified to ensure that unnecessary files which are not needed for the build are not copied.* Also, a `.dockerignore` file is used to isolate files that we do not want to copy over, such as the node_modules folder.
 - `WORKDIR` : is a dockerfile command used to specify the working directory where our app's files should be stored in the container. The linux system usually has a `usr` folder, and this is the most common place to store user files. Therefore to store our files in an app folder in the usr folder the command would be `WORKDIR usr/app`. This command needs to come before the 'copy' and 'run' commands.
 
-In the docker client, navigate to the folder that contains the dockerfile and run the command `docker build .`. This will pass the dockerfile to the docker server, which creates the image and returns the id. To break down the command, `docker` sends the dockerfile to the server, `build` creates the image, `.` the dot specifies that the build context should be the whole set of files and folder structure of the base image.
+In the docker client, navigate to the folder that contains the dockerfile and run the command `docker build .`. This will pass the dockerfile to the docker server, which creates the image and returns the id. To break down the command, `docker` sends the dockerfile to the server, `build` creates the image, `.` the dot specifies that the build context should be the whole set of files and folder structure of the base image (alternatively, that Docker should look for the dockerfile in the current directory).
 
 Rather than using the image id to start up a container, the convention is to **tag the image** for the build process. The naming convention is in the format `<dockerUsername>/<imageName>:latest>`. latest refers to the most recent version of the image, and it is completely optional as it gets appended when you don't include it. Therefore to run the build command would be `docker build -t coderFemi/redis:latest .`, and the run command would be `docker run coderFemi/redis`.
 
@@ -143,7 +143,7 @@ spec:                   // The attributes to be applied to the object about to b
 Types of Services:
 * Cluster IP: Sets up a url through which a pod can be accessed, only by other pods in its cluster.
 * Node Port: This makes a pod accessible from outside the cluster. This type of service is mainly for development purposes.
-* Load Balancer: This service makes a pod accessible from outside the cluster. This type is for production, as it  manages incoming traffic and redirects to the pods in the cluster. In reality, the load balancer service uses a cloud provider's load balancer to direct traffic to an ingress controller which handles routing of requests to the ClusterIps of each pod in the cluster.
+* Load Balancer: This service makes a pod accessible from outside the cluster. This type is for production, as it  manages incoming traffic and redirects to the pods in the cluster. In reality, the load balancer service uses a cloud provider's load balancer to direct traffic to an ingress controller which handles routing of requests to the ClusterIps of each pod in the cluster. The load balancer used mostly is the kubernetes ingress-nginx which is installed via the `kubectl apply -f <installationUrl>`. Then an ingress service is configured in a yaml file. The configuration requires creating a fake host and mapping it to your machine's localhost in a config file located at `C:/Windows/System32/drivers/etc/hosts`
 * External Name: This redirects in-cluster requests to a CNAME url.
 
 In the YAML file (file name should be suffixed with 'srv'), the following is the code required for creating a service:
@@ -175,6 +175,9 @@ When a NodePort service is created, a port, usually in the range 30000 - 32000, 
 - `kubectl logs <podName>` // Show logs for a pod
 - `kubectl delete <object> <objectName>` // Delete an object
 - `kubectl rollout restart deployment <deploymentName>` // This restarts a deployment using an updated image (new version) pulled from dockerhub.
+
+#### Skaffold
+Skaffold watches for changes to kubernetes config files (yaml) and automatically applies it to the running cluster. It also ensures that anytime the app source code is updated, it is immediately synced to the appropriate container running inside the cluster.
 
 
 ## TYPESCRIPT
