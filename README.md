@@ -322,9 +322,12 @@ The combination of interfaces and classes provide the reusability of code in Typ
 * **Dual Nature of Classes** In Typescript, classes are used both as a value and a type for annotation purposes. In other words, a class is used to create an instance of an object, and it can also refer to the Class type. For example, a User class can be used to create a new instance of a user, and it can also be used to refer to a type of User.
 * **implements clause** The `implements` keyword is used to create a checking relationship between a class and an imported interface. E.g. `class User implements SomeInterface` means that TS will always check the User class to ensure that it satisfies/contains all the required properties set by the interface. If it doesn't, the file is highlighted with an error, and it is easy to trace the error to that particular file.
 
-### Remote Development
+## Remote Development
 Remote development is desirable when our local machine can no longer support the requirements for running multiple clusters. Running our clusters on a cloud platform provides access to more system resources and faster times for cluster deployment.
 
 Skaffold works in sync with Google Cloud and helps to automate workflow, just as it does locally. When we configure new dependencies in the package.json file, skaffold communicates this to Google Cloud Builder which builds the image, using the integrated Docker Build, and then deploys the new image on a virtual machine on the Google Cloud Platform. This automated workflow is much faster than local development and there is no need to worry about system resources.
 
 To connect to GCP, the Google Cloud SDK is installed on the system and it provides the context/settings to interact directly with our cluster running in the cloud.
+
+## Microservices Architecture - Salient Points
+- When working with a multi-services app, each one of them would likely be written in a different language with different frameworks. For instance, one server might be in Node.js/Express while another might utilise Ruby on rails. They all send back different error responses in different structures/formats, from different levels of the request stage (validation level, database level etc). Since they all have to communicate with one single front-end, it is necessary to harmonise all the responses into one single consistent structure that is acceptable by the front-end. This is done easily with error-handling middleware.
