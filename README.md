@@ -321,3 +321,10 @@ The combination of interfaces and classes provide the reusability of code in Typ
 * **Default vs Named Exports**: It is a commonly accepted convention by Typescript developers to only use named exports and not default exports. Sticking to only one type of export reduces the likelihood of generating an error.
 * **Dual Nature of Classes** In Typescript, classes are used both as a value and a type for annotation purposes. In other words, a class is used to create an instance of an object, and it can also refer to the Class type. For example, a User class can be used to create a new instance of a user, and it can also be used to refer to a type of User.
 * **implements clause** The `implements` keyword is used to create a checking relationship between a class and an imported interface. E.g. `class User implements SomeInterface` means that TS will always check the User class to ensure that it satisfies/contains all the required properties set by the interface. If it doesn't, the file is highlighted with an error, and it is easy to trace the error to that particular file.
+
+### Remote Development
+Remote development is desirable when our local machine can no longer support the requirements for running multiple clusters. Running our clusters on a cloud platform provides access to more system resources and faster times for cluster deployment.
+
+Skaffold works in sync with Google Cloud and helps to automate workflow, just as it does locally. When we configure new dependencies in the package.json file, skaffold communicates this to Google Cloud Builder which builds the image, using the integrated Docker Build, and then deploys the new image on a virtual machine on the Google Cloud Platform. This automated workflow is much faster than local development and there is no need to worry about system resources.
+
+To connect to GCP, the Google Cloud SDK is installed on the system and it provides the context/settings to interact directly with our cluster running in the cloud.
