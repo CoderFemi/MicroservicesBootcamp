@@ -197,6 +197,7 @@ On the other hand, with type inference, TS guesses the type of the variable base
 * When a variable is declared on one line and initialised later on another.
 * When the type of the variable cannot be inferred correctly. E.g. when we assign a boolean to a variable but later need to assign it a value of number. Here TS cannot infer that the type could be more than one. So we need to add in an annotation that specifies the type as `:boolean | number`
 * When a method returns the 'any' type and we need to clarify the value e.g. JSON.parse().
+To instruct Typescript to ignore an error that we are sure has been taken care of, we simply add an exclamation mark ! to the end of the highlighted statement.
 
 #### Functions
 For functions, we add type annotation to tell TS the type of arguments that are being passed into and the type of value returned from the function. TS can infer what value is returned from the function, so annotation may not be required for a return value. It cannot infer what arguments are being passed in. *It is however recommended to always use a return annotation to enable TS detect when a mistake is made and no return statement is declared.* When no return statement is declared and there is no return annotation, TS will simply infer a type of 'void' for the return value and raise no errors. If we deliberately intend not to return anything from the function, then a return annotation of `void` is required. If we are never going to return anything from the function then we annotate with `never`.
@@ -340,4 +341,22 @@ To connect to GCP, the Google Cloud SDK is installed on the system and it provid
 ## Microservices Architecture - Salient Points
 - **Error Handling Strategies**When working with a multi-services app, each one of them would likely be written in a different language with different frameworks. For instance, one server might be in Node.js/Express while another might utilise Ruby on rails. They all send back different error responses in different structures/formats, from different levels of the request stage (validation level, database level etc). Since they all have to communicate with one single front-end, it is necessary to harmonise all the responses into one single consistent structure that is acceptable by the front-end. This is done easily with error-handling middleware. Also, when using the async keyword for an asynchronous request, the `next` function provided by express needs to be invoked within a try-catch statement. The need for this is removed by using an npm library `express-async-errors`.
 - **Abstract Class**: An abstract class is used in Typescript to set up requirements for subclasses that have the same structure. This abstract class cannot be instantiated i.e. we cannot use the 'new' keyword on it to create a new instance. In contrast with an interface which disappears after compilation to Javascript, an abstract class persists, and as such we can use the `instanceof` keyword to use it for comparison with the homogenous subclasses we create. The `abstract` keyword is used to define the class, as well as any *property signatures* and *method signatures* that belong to the class.
-- User authentication is a challenging issue in microservices, and largely still remains an unsolved problem. However, there are a number of approaches used to persist user login across the different services. The most practical, which does not introduce dependencies between services, is to integrate the code for identifying a user into all the different services.
+- **Authentication/Authorisation**: User authentication is a challenging issue in microservices, and largely still remains an unsolved problem. However, there are a number of approaches used to persist user login across the different services. The most practical, which does not introduce dependencies between services, is to introduce the code for verifying a user into all the different services. The auth service creates a `session` and assigns to it a `jsonwebtoken` encoded with a `secret`. The session is sent back via response headers to the client. When the client makes any subsequent request to any of the other services, the secret is made available via an environment variable (it should not be hardcoded) to each of those services, so that they can use it to decode the session object and verify the user before processing the request. The secret is made available to the node cluster by *manually* running an *imperative command* to create an object that contains the secret. This is `kubectl create secret generic jwt-secret --from-literal=jwt=<secret>`. Running this imperatively without using a config file, is so that the secret is not stored on any file in the source code. The downside is that whenever the server is being redeployed, the command has to be run manually. So the developer has to find somewhere safe - outside the app - to document the secrets for easy reference. `kubectl get secrets` returns a list of secrets available on the cluster. Then the deployment files for each of the services is updated to retrieve the secret and assign it to its environment variables whenever a new container is being created. If an invalid value is provided for the secret, the container being created will refuse to start up and will log an error of `CreateContainerConfigError`.
+
+
+## Other Notes
+- Formatting JSON properties: Javascript provides a way to modify/transform our JSON objects when using JSON.stringify(). It can also be implemented in our Mongoose schemas to suppress some fields (e.g. password fields) from being returned to the client. The following code changes the id key, removes the password and versionKey fields.
+
+```
+{
+    toJSON: {
+      transform(doc, ret) {
+        ret.id = ret._id
+        delete ret._id
+        delete ret.password
+        delete ret.__v
+      }
+    }
+}
+
+```
