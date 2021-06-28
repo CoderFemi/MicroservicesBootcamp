@@ -347,9 +347,33 @@ Generics help you to write generalized methods instead of writing and repeating 
 ## Remote Development
 Remote development is desirable when our local machine can no longer support the requirements for running multiple clusters. Running our clusters on a cloud platform provides access to more system resources and faster times for cluster deployment.
 
-Skaffold works in sync with Google Cloud and helps to automate workflow, just as it does locally. When we configure new dependencies in the package.json file, skaffold communicates this to Google Cloud Builder which builds the image, using the integrated Docker Build, and then deploys the new image on a virtual machine on the Google Cloud Platform. This automated workflow is much faster than local development and there is no need to worry about system resources.
+Skaffold works in sync withenvironment, none of the services should be listening on any port; supertest will provide ephemeral ports to each of them.
+The same thing applies to the database. All the services cannot connect to the same database, it would be more efficient to run an in-memory database like `mongodb-memory-server` that all the test suites for the services can run on concurrently.
+All testing libraries/dependencies are not meant for production, therefore should be installed as dev dependencies, and not included on the container image. The npm install co Google Cloud and helps to automate workflow, just as it does locally. When we configure new dependencies in the package.json file, skaffold communicates this to Google Cloud Builder which builds the image, using the integrated Docker Build, and then deploys the new image on a virtual machine on the Google Cloud Platform. This automated workflow is much faster than local development and there is no need to worry about system resources.
 
 To connect to GCP, the Google Cloud SDK is installed on the system and it provides the context/settings to interact directly with our cluster running in the cloud.
+
+## Testing
+The type of testing carried out in a microservices environment depends on the scope of the tests involved. The following could apply:
+- Testing a single piece of code in isolation i.e. unit testing. This would refer to testing a piece of middleware to ascertain that it functions properly.
+- Test how different pieces of code work together - testing the process flow from one piece of middleware to another.
+- Test how different components work together i.e. component testing.
+- Test how different services work together.
+The `supertest` library is used to test route handlers and make assertions on the responses received. When running tests for different microservices concurrently on the same machine, supertest uses random ports for those different services to listen on. This means that for the test mmand in the dockerfile is updated to ensure that only production dependencies are installed in the container: `RUN npm install --only=prod`.
+The following configuration in the package.json file is required to setup the testing environment for Node.js:
+
+```
+  "scripts": {
+    "test": "jest --watchAll --no-cache" // the no-cache flag solves the issue encountered when updated typescript file changes are not detected by jest.
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "setupFilesAfterEnv": [
+      "<filePath/setup.ts>"
+    ]
+  }
+```
 
 ## Microservices Architecture - Salient Points
 - **Error Handling Strategies**When working with a multi-services app, each one of them would likely be written in a different language with different frameworks. For instance, one server might be in Node.js/Express while another might utilise Ruby on rails. They all send back different error responses in different structures/formats, from different levels of the request stage (validation level, database level etc). Since they all have to communicate with one single front-end, it is necessary to harmonise all the responses into one single consistent structure that is acceptable by the front-end. This is done easily with error-handling middleware. Also, when using the async keyword for an asynchronous request, the `next` function provided by express needs to be invoked within a try-catch statement. The need for this is removed by using an npm library `express-async-errors`.
