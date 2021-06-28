@@ -197,7 +197,8 @@ On the other hand, with type inference, TS guesses the type of the variable base
 * When a variable is declared on one line and initialised later on another.
 * When the type of the variable cannot be inferred correctly. E.g. when we assign a boolean to a variable but later need to assign it a value of number. Here TS cannot infer that the type could be more than one. So we need to add in an annotation that specifies the type as `:boolean | number`
 * When a method returns the 'any' type and we need to clarify the value e.g. JSON.parse().
-To instruct Typescript to ignore an error that we are sure has been taken care of, we simply add an exclamation mark ! to the end of the highlighted statement.
+To instruct Typescript to ignore an error that we are sure has been taken care of, we simply add an `exclamation mark !` to the end of the highlighted statement.
+Also, to check if a top-level property in a nested object is defined/truthy, we use a `question mark ?` before that object. E.g. (!req.session || !req.session.jwt) === (!req.session?.jwt).
 
 #### Functions
 For functions, we add type annotation to tell TS the type of arguments that are being passed into and the type of value returned from the function. TS can infer what value is returned from the function, so annotation may not be required for a return value. It cannot infer what arguments are being passed in. *It is however recommended to always use a return annotation to enable TS detect when a mistake is made and no return statement is declared.* When no return statement is declared and there is no return annotation, TS will simply infer a type of 'void' for the return value and raise no errors. If we deliberately intend not to return anything from the function, then a return annotation of `void` is required. If we are never going to return anything from the function then we annotate with `never`.
@@ -291,6 +292,18 @@ const printGreeting = (person1: Person): void => {
 }
 
 ```
+The keyword `declare global` is used to modify an existing interface to contain additional types.
+
+```
+declare global {
+    namespace PeopleDirectory {
+        interface Person {
+            address?: string
+        }
+    }
+}
+```
+The above shows that the Person interface in the PeopleDirectory namespace should have an additional optional (question mark makes it optional) address field with a type of string.
 
 #### Classes
 Typescript uses the modifiers public, private and protected on methods to detect errors in code. A method with no modifier is public by default. A private method can only be accessed by other methods within the same class, while a protected method can only be accessed by other methods in the same class as well as child classes.
