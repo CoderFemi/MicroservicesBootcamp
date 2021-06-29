@@ -10,7 +10,7 @@ The stand-alone nature of a microservice guarantees the continual uptime of the 
 
 ## Data Management in Microservices
 The biggest problem of Microservices is data management; how to communicate between one service and another. Since each service cannot read from another's database, there needs to be a form of direct request made from one service to another. This problem can be solved either with Synchronous communication or Asynchronous communication.
-- Synchronous communication: In sync comm, the new service connects to the other services *by using direct requests*. This has its pros and cons. It is very easy to understand and the requesting service does not need to have a database. However, if any of the other services fail, the request made by the new service will also fail, because there is a dependency between the services. There can also be an intricate web of requests, if servies depend on other services which depend on other services.
+- Synchronous communication: In sync comm, the new service connects to the other services *by using direct requests*. This has its pros and cons. It is very easy to understand and the requesting service does not need to have a database. However, if any of the other services fail, the request made by the new service will also fail, because there is a dependency between the services. There can also be an intricate web of requests, if services depend on other services which depend on other services.
 - Asynchronous communication: With async comm, *communication is established using events*. This can be accomplished in two ways:
     * Using an event bus: An event bus is set up to receive events and transmit them to the services that would process and send back results which would be returned to the requesting service. Using an event bus also has its shortcomings, because it is a single point of failure, and there can also be an intricate web of events being sent back and forth.
     * Using an event bus, along with a separate database for the new microservice: In this structure, there are no dependencies between services, and data retrieval is super fast. Services are setup to emit an event anytime a resource is created. The data is received by the service which needs it from the event bus and is stored in a separate database. When a request is made for that data, the service can easily look it up in its own database, without having to communicate with the other services again. The downsides to this approach is that it's harder to understand, and there are duplicated data, which may become stale over time. The cost of storing the duplicated data might be negligible and not pose any problem.
@@ -374,6 +374,26 @@ The following configuration in the package.json file is required to setup the te
     ]
   }
 ```
+
+## React Development with Next.js
+The traditional method for rendering React components is `client-side rendering`. The browser makes an initial request to a server which sends a bare-bones html file with a script tag. The browser makes a second request for the javascript files and runs the javascript (React.createElement calls) to render the required html. Then a final request is made to the server to retrieve any public data that needs to be displayed, such as a landing page, signup and signin pages.
+
+With Next.js `server-side rendering`, only one request to the server is needed to initially render the app on the client. The Next.js server retrieves all information needed along with all the *pre-rendered html (javascript is run on the server, not on the client)* and sent to the client. This makes the app start-up very fast, much more significantly on mobile devices, which do not have to deal with running so much javascript.
+
+Next.js uses the `pages directory` for routing. This performs the exact function that the React Router component does. All the different routes are created as files in the pages directory, and are identified as routes by their particular file names.
+
+Next.js sometimes does not carry out reloading of files efficiently. When this problem is encountered, in order for it to auto-refresh the browser content when source files are changed, the following `next.config.js` file is created at the root level with the following content:
+
+```
+module.exports = {
+    webpackDevMiddleware: config => {
+        config.watchOptions.poll = 300
+        return config
+    }
+}
+
+```
+Using global stylesheets in Next.js involves creating a `_app.js` file in the pages directory, which exports a wrapper component that applies the styles to any component passed into it. All the components in the app will be passed through it (behind the scenes) in order to access the css styles.
 
 ## Microservices Architecture - Salient Points
 - **Error Handling Strategies**When working with a multi-services app, each one of them would likely be written in a different language with different frameworks. For instance, one server might be in Node.js/Express while another might utilise Ruby on rails. They all send back different error responses in different structures/formats, from different levels of the request stage (validation level, database level etc). Since they all have to communicate with one single front-end, it is necessary to harmonise all the responses into one single consistent structure that is acceptable by the front-end. This is done easily with error-handling middleware. Also, when using the async keyword for an asynchronous request, the `next` function provided by express needs to be invoked within a try-catch statement. The need for this is removed by using an npm library `express-async-errors`.
