@@ -2,11 +2,11 @@ import { useState } from "react"
 import Router from 'next/router'
 import useRequest from "../../hooks/use-request"
 
-const Signup = () => {
+const Signin = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const { doRequest, errors } = useRequest({
-        url: '/api/users/signup',
+        url: '/api/users/signin',
         method: 'post',
         body: {
             email,
@@ -17,13 +17,13 @@ const Signup = () => {
     
     const onSubmit = async (event) => {
         event.preventDefault()
-        doRequest().then(data => console.log(data))
+        doRequest()
         setEmail('')
         setPassword('')
     }
     return (
         <form className="w-50 m-auto" onSubmit={onSubmit}>
-            <h1>Sign Up</h1>
+            <h1>Sign In</h1>
             {errors}
             <div className="form-group">
                 <label htmlFor="email">Email Address</label>
@@ -33,9 +33,9 @@ const Signup = () => {
                 <label htmlFor="password">Password</label>
                 <input type="password" id="password" value={password} onChange={e => setPassword(e.target.value)} className="form-control" />
             </div>
-            <button className="btn btn-primary">Sign Up</button>
+            <button className="btn btn-primary">Sign In</button>
         </form>
     )
 }
 
-export default Signup
+export default Signin
