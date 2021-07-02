@@ -24,3 +24,11 @@ build:
         manual:
           - src: '**/*.js'
             dest: .
+    - image: coderfemi/auctions
+      context: auctions
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: 'src/**/*.ts'
+            dest: .

@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auctions-mongo-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auctions-mongo
+  template:
+    metadata:
+      labels:
+        app: auctions-mongo
+    spec:
+      containers:
+        - name: auctions-mongo
+          image: mongo
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auctions-mongo-srv
+spec:
+  selector:
+    app: auctions-mongo
+  ports:
+    - name: db
+      protocol: TCP
+      port: 27017
+      targetPort: 27017

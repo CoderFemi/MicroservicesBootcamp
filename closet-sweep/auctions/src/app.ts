@@ -3,6 +3,9 @@ import 'express-async-errors'
 import cookieSession from 'cookie-session'
 import { errorHandler, NotFoundError, currentUser } from '@closetsweep/common'
 import { createAuctionRouter } from './routes/new'
+import { showAuctionRouter } from './routes/show'
+import { indexAuctionRouter } from './routes'
+import { updateAuctionRouter } from './routes/update'
 
 const app = express()
 app.set('trust proxy', true)
@@ -14,9 +17,9 @@ app.use(cookieSession({
 }))
 app.use(currentUser)
 app.use(createAuctionRouter)
-// app.use(signupRouter)
-// app.use(signinRouter)
-// app.use(signoutRouter)
+app.use(showAuctionRouter)
+app.use(indexAuctionRouter)
+app.use(updateAuctionRouter)
 
 app.get('*', () => {
     throw new NotFoundError()

@@ -1,12 +1,11 @@
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import mongoose from 'mongoose'
-import request from 'supertest'
-import { app } from '../app'
+import jwt from 'jsonwebtoken'
 
 declare global {
     namespace NodeJS {
         interface Global {
-            signin(): Promise<string[]>
+            signin(): string[]
         }
     }
 }
@@ -38,16 +37,15 @@ afterAll(async () => {
 
 // Make cookie globally available to all tests to avoid repetition.
 // only available in test environment.
-global.signin = async () => {
-    const email = 'johnson@gmail.com'
-    const password = 'pass2345'
+global.signin = () => {
+    const payload = {
+        id: new mongoose.Types.ObjectId().toHexString(),
+        email: 'johnson@gmail.com'
+    }
 
-    const response = await request(app)
-        .post('/api/users/signup')
-        .send({
-        email, password
-        })
-        .expect(201)
-    const cookie = response.get('Set-Cookie')
-    return cookie
+    const token = jwt.sign(payload, process.env.JWT_KEY!)
+    const session = { jwt: token }
+    const sessionJSON = JSON.stringify(session)
+    const base64 = Buffer.from(sessionJSON).toString('base64')
+    return [`express:sess=${base64}`]
 }
