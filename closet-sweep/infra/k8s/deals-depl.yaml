@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auctions-depl
+  name: deals-depl
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: auctions
+      app: deals
   template:
     metadata:
       labels:
-        app: auctions
+        app: deals
     spec:
       containers:
-        - name: auctions
-          image: coderfemi/auctions
+        - name: deals
+          image: coderfemi/deals
           env:
             - name: MONGO_URI
-              value: 'mongodb://auctions-mongo-srv:27017/auctions'
+              value: 'mongodb://deals-mongo-srv:27017/deals'
             - name: JWT_KEY
               valueFrom:
                 secretKeyRef:
@@ -27,12 +27,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: auctions-srv
+  name: deals-srv
 spec:
   selector:
-    app: auctions
+    app: deals
   ports:
-    - name: auctions
+    - name: deals
       protocol: TCP
       port: 3000
       targetPort: 3000

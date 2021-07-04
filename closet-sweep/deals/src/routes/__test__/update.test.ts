@@ -6,7 +6,7 @@ const id = new mongoose.Types.ObjectId().toHexString()
 
 it('returns a 404 if the provided id does not exist', async () => {
     await request(app)
-        .put(`/api/auctions/${id}`)
+        .put(`/api/deals/${id}`)
         .set('Cookie', global.signin())
         .send({
             title: 'Cooker',
@@ -17,7 +17,7 @@ it('returns a 404 if the provided id does not exist', async () => {
 
 it('returns a 401 if the user is not authenticated', async () => {
     await request(app)
-        .put(`/api/auctions/${id}`)
+        .put(`/api/deals/${id}`)
         .send({
             title: 'Cooker',
             price: 360
@@ -25,9 +25,9 @@ it('returns a 401 if the user is not authenticated', async () => {
         .expect(401)
 })
 
-it('returns a 401 if the user does not own the auction', async () => {
+it('returns a 401 if the user does not own the deal', async () => {
     const response = await request(app)
-        .post('/api/auctions')
+        .post('/api/deals')
         .set('Cookie', global.signin())
         .send({
             title: 'Grey Jeans',
@@ -35,7 +35,7 @@ it('returns a 401 if the user does not own the auction', async () => {
         })
     
     await request(app)
-        .put(`/api/auctions/${response.body.id}`)
+        .put(`/api/deals/${response.body.id}`)
         .set('Cookie', global.signin())
         .send({
             title: "Black Jeans",
@@ -47,7 +47,7 @@ it('returns a 401 if the user does not own the auction', async () => {
 it('returns a 400 if the user provides an invalid title or price', async () => {
     const cookie = global.signin()
     const response = await request(app)
-        .post('/api/auctions')
+        .post('/api/deals')
         .set('Cookie', cookie)
         .send({
             title: 'Grey Jeans',
@@ -55,7 +55,7 @@ it('returns a 400 if the user provides an invalid title or price', async () => {
         })
     
     await request(app)
-        .put(`/api/auctions/${response.body.id}`)
+        .put(`/api/deals/${response.body.id}`)
         .set('Cookie', cookie)
         .send({
             title: '',
@@ -64,7 +64,7 @@ it('returns a 400 if the user provides an invalid title or price', async () => {
         .expect(400)
     
     await request(app)
-        .put(`/api/auctions/${response.body.id}`)
+        .put(`/api/deals/${response.body.id}`)
         .set('Cookie', cookie)
         .send({
             title: 'Grey Jeans',
@@ -77,7 +77,7 @@ it('returns a 400 if the user provides an invalid title or price', async () => {
 it('returns a 200 if the provided inputs are valid', async () => {
     const cookie = global.signin()
     const response = await request(app)
-        .post('/api/auctions')
+        .post('/api/deals')
         .set('Cookie', cookie)
         .send({
             title: 'Grey Jeans',
@@ -85,7 +85,7 @@ it('returns a 200 if the provided inputs are valid', async () => {
         })
     
     await request(app)
-        .put(`/api/auctions/${response.body.id}`)
+        .put(`/api/deals/${response.body.id}`)
         .set('Cookie', cookie)
         .send({
             title: 'Jordan sneakers',
@@ -93,8 +93,8 @@ it('returns a 200 if the provided inputs are valid', async () => {
         })
         .expect(200)
     
-    const auctionResponse = await request(app)
-        .get(`/api/auctions/${response.body.id}`)
-    expect(auctionResponse.body.title).toEqual('Jordan sneakers')
-    expect(auctionResponse.body.price).toEqual(700)
+    const dealResponse = await request(app)
+        .get(`/api/deals/${response.body.id}`)
+    expect(dealResponse.body.title).toEqual('Jordan sneakers')
+    expect(dealResponse.body.price).toEqual(700)
 })

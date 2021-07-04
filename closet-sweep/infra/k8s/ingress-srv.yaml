@@ -17,11 +17,11 @@ spec:
                 name: auth-srv
                 port:
                   number: 3000
-          - path: /api/auctions/?(.*)
+          - path: /api/deals/?(.*)
             pathType: Prefix
             backend:
               service:
-                name: auctions-srv
+                name: deals-srv
                 port:
                   number: 3000
           - path: /?(.*)

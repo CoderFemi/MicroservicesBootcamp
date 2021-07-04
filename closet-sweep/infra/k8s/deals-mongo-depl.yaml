@@ -1,28 +1,28 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auctions-mongo-depl
+  name: deals-mongo-depl
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: auctions-mongo
+      app: deals-mongo
   template:
     metadata:
       labels:
-        app: auctions-mongo
+        app: deals-mongo
     spec:
       containers:
-        - name: auctions-mongo
+        - name: deals-mongo
           image: mongo
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: auctions-mongo-srv
+  name: deals-mongo-srv
 spec:
   selector:
-    app: auctions-mongo
+    app: deals-mongo
   ports:
     - name: db
       protocol: TCP

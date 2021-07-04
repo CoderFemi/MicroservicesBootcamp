@@ -6,7 +6,7 @@ import {
     NotFoundError,
     NotAuthorisedError
 } from '@closetsweep/common'
-import { Auction } from '../../models/auction'
+import { Deal } from '../../models/deal'
 
 const router = express.Router()
 const validateBody = [
@@ -14,20 +14,20 @@ const validateBody = [
     body('price').isFloat({ gt: 0 }).withMessage('Price must be greater than 0')
 ]
 
-router.put('/api/auctions/:id', requireAuth, validateBody, validateRequest, async (req: Request, res: Response) => {
-    const auction = await Auction.findById(req.params.id)
-    if (!auction) {
+router.put('/api/deals/:id', requireAuth, validateBody, validateRequest, async (req: Request, res: Response) => {
+    const deal = await Deal.findById(req.params.id)
+    if (!deal) {
         throw new NotFoundError()
     }
-    if (auction.userId !== req.currentUser!.id) {
+    if (deal.userId !== req.currentUser!.id) {
         throw new NotAuthorisedError()
     }
-    auction.set({
+    deal.set({
         title: req.body.title,
         price: req.body.price
     })
-    await auction.save()
-    res.send(auction)
+    await deal.save()
+    res.send(deal)
 })
 
-export { router as updateAuctionRouter }
+export { router as updateDealRouter }

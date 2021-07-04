@@ -24,8 +24,8 @@ build:
         manual:
           - src: '**/*.js'
             dest: .
-    - image: coderfemi/auctions
-      context: auctions
+    - image: coderfemi/deals
+      context: deals
       docker:
         dockerfile: Dockerfile
       sync:

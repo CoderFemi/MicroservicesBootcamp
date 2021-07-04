@@ -84,7 +84,7 @@ The dockerfile format is `Dockerfile`, capitalised first letter and with no file
 
 In the docker client, navigate to the folder that contains the dockerfile and run the command `docker build .`. This will pass the dockerfile to the docker server, which creates the image and returns the id. To break down the command, `docker` sends the dockerfile to the server, `build` creates the image, `.` the dot specifies that the build context should be the whole set of files and folder structure of the base image (alternatively, that Docker should look for the dockerfile in the current directory).
 
-Rather than using the image id to start up a container, the convention is to **tag the image** for the build process. The naming convention is in the format `<dockerUsername>/<imageName>:latest>`. latest refers to the most recent version of the image, and it is completely optional as it gets appended when you don't include it. Therefore to run the build command would be `docker build -t coderFemi/redis:latest .`, and the run command would be `docker run coderFemi/redis`.
+Rather than using the image id to start up a container, the convention is to **tag the image** for the build process. The naming convention is in the format `<dockerUsername>/<imageName>:latest>`. latest refers to the most recent version of the image, and it is completely optional as it gets appended when you don't include it. Therefore to run the build command would be `docker build -t coderfemi/redis:latest .`, and the run command would be `docker run coderfemi/redis`.
 
 A docker image can also be manually generated using the command line instead of a dockerfile, using the `docker commit` command.
 <!-- docker commit -c "CMD 'redis-server'" CONTAINERID -->
@@ -335,6 +335,21 @@ The combination of interfaces and classes provide the reusability of code in Typ
 #### Generic Types
 Generics offer a way to create reusable components (classes, functions or interfaces). Generics provide a way to make components work with any data type and not restrict to one data type. So, components can be called or used with a variety of data types.
 Generics help you to write generalized methods instead of writing and repeating the same block of code. A generic type is annotated with a pair of angle brackets `<T>`
+
+#### Getters
+A `getter` sets a property on an instance of a class. This is useful for when a certain property is not to be accessed until the class is instantiated.
+
+```
+class Person {
+  private secretDesire = 'climb mount everest'
+  get secret(){
+    return this.secretDesire
+  }
+}
+const personOne = new Person
+console.log(personOne.secret) // 'climb mount everest'
+
+```
 
 ### Modules and Typescript
 * **Type Declaration Files**: When using an npm module, it is important to check if it has a type declaration file. The import statement will show an error if there is none. Type declaration files are usually downloadable as npm modules in the form `@types/<moduleName>`. The type declaration file usually shows a lot of information about the type annotations for all the methods and properties available in the module. The same thing is applicable for modules imported with html script tags. For instance, using the Google maps API script tag creates a global namespace in our project, but Typescript cannot recognise it until the type declaration file for it is installed.

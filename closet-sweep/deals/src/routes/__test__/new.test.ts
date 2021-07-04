@@ -1,43 +1,42 @@
 import request from 'supertest'
 import { app } from '../../app'
-import { Auction } from '../../../models/auction'
+import { Deal } from '../../../models/deal'
 
-it('has a route handler listening to /api/auctions for post requests', async () => {
+it('has a route handler listening to /api/deals for post requests', async () => {
     const response = await request(app)
-        .post('/api/auctions')
+        .post('/api/deals')
         .send({})
     expect(response.status).not.toEqual(404)
 })
 
 it('can only be accessed if the user is signed in', async () => {
-    const response = await request(app)
-        .post('/api/auctions')
+    await request(app)
+        .post('/api/deals')
         .send({})
 })
 
 it('does not return a status of 401 if the user is signed in', async () => {
     const response = await request(app)
-        .post('/api/auctions')
+        .post('/api/deals')
         .set('Cookie', global.signin())
         .send({})
     expect(response.status).not.toEqual(401)
 })
 
-it('returns an error if an invalid auction title is provided', async () => {
+it('returns an error if an invalid deal title is provided', async () => {
     await request(app)
-        .post('/api/auctions')
+        .post('/api/deals')
         .set('Cookie', global.signin())
         .send({
             title: '',
             price: 200
         })
         .expect(400)
-    
 })
 
-it('returns an error if an invalid auction price is provided', async () => {
+it('returns an error if an invalid deal price is provided', async () => {
     await request(app)
-        .post('/api/auctions')
+        .post('/api/deals')
         .set('Cookie', global.signin())
         .send({
             title: 'title',
@@ -46,20 +45,20 @@ it('returns an error if an invalid auction price is provided', async () => {
         .expect(400)
 })
 
-it('creates an auction with valid inputs', async () => {
-    let auctions = await Auction.find({})
-    expect(auctions.length).toEqual(0)
-    const newAuction = {
+it('creates a deal with valid inputs', async () => {
+    let deals = await Deal.find({})
+    expect(deals.length).toEqual(0)
+    const newDeal = {
         title: 'title',
         price: 250,
     }
     await request(app)
-        .post('/api/auctions')
+        .post('/api/deals')
         .set('Cookie', global.signin())
-        .send(newAuction)
+        .send(newDeal)
         .expect(201)
-    auctions = await Auction.find({})
-    expect(auctions.length).toEqual(1)
-    expect(auctions[0].price).toEqual(newAuction.price)
-    expect(auctions[0].title).toEqual(newAuction.title)
+    deals = await Deal.find({})
+    expect(deals.length).toEqual(1)
+    expect(deals[0].price).toEqual(newDeal.price)
+    expect(deals[0].title).toEqual(newDeal.title)
 })

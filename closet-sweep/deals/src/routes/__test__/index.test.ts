@@ -1,22 +1,22 @@
 import request from 'supertest'
 import { app } from '../../app'
 
-const createAuction = () => {
+const createDeal = () => {
      return request(app)
-        .post('/api/auctions')
+        .post('/api/deals')
         .set('Cookie', global.signin())
         .send({
             title: 'Lawn mower',
             price: 125
         })
 }
-it('can fetch a list of auctions', async () => {
-    await createAuction()
-    await createAuction()
-    await createAuction()
+it('can fetch a list of deals', async () => {
+    await createDeal()
+    await createDeal()
+    await createDeal()
 
     const response = await request(app)
-        .get('/api/auctions')
+        .get('/api/deals')
         .expect(200)
     expect(response.body.length).toEqual(3)
 })
