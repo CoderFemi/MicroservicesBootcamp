@@ -469,3 +469,5 @@ Code sharing is now possible by simply running the npm install command to instal
 }
 
 ```
+
+To solve issue of ECONerror, use `kubectl delete -A ValidatingWebhookConfiguration ingress-nginx-admission`

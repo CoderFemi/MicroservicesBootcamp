@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express'
 import { body } from 'express-validator'
-import { Deal } from '../../models/deal'
+import { Deal } from '../models/deal'
 import { requireAuth, validateRequest } from '@closetsweep/common'
 import { DealCreatedPublisher } from '../events/publishers/deal-created-publisher'
 import { natsWrapper } from '../nats-wrapper'
@@ -19,12 +19,14 @@ router.post('/api/deals', requireAuth, validateBody, validateRequest, async (req
         userId: req.currentUser!.id
     })
     await deal.save()
-    await new DealCreatedPublisher(natsWrapper.client).publish({
-        id: deal.id,
-        title: deal.title,
-        price: deal.price,
-        userId: deal.userId
-    })
+    if (process.env.NODE_ENV !== 'test') {
+        await new DealCreatedPublisher(natsWrapper.client).publish({
+            id: deal.id,
+            title: deal.title,
+            price: deal.price,
+            userId: deal.userId
+        })
+    }
     res.status(201).send(deal)
 })
 

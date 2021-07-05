@@ -6,7 +6,7 @@ import {
     NotFoundError,
     NotAuthorisedError
 } from '@closetsweep/common'
-import { Deal } from '../../models/deal'
+import { Deal } from '../models/deal'
 
 const router = express.Router()
 const validateBody = [

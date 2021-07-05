@@ -1,24 +1,24 @@
 import mongoose from 'mongoose'
-import { natsWrapper } from './nats-wrapper'
 import { app } from './app'
+import { natsWrapper } from './nats-wrapper'
 
 const start = async () => {
   if (!process.env.JWT_KEY) {
-    throw new Error('JWT must be defined')
+    throw new Error('JWT_KEY must be defined')
   }
   if (!process.env.MONGO_URI) {
     throw new Error('MONGO_URI must be defined!')
   }
   try {
-    // Connect to Nats Streaming
-    await natsWrapper.connect('deals', 'clientstring', 'http://nats-srv:4222')
-    const natsClient = natsWrapper.client
-    natsClient.on('close', () => {
+    // Connect to NATS Streaming
+    await natsWrapper.connect('closetsweep', 'random1234', 'http://nats-srv:4222')
+    // Graceful shutdown
+    natsWrapper.client.on('close', () => {
       console.log('NATS connection closed!')
       process.exit()
     })
-    process.on('SIGINT', () => natsClient.close())
-    process.on('SIGTERM', () => natsClient.close())
+    process.on('SIGINT', () => natsWrapper.client.close())
+    process.on('SIGTERM', () => natsWrapper.client.close())
 
     // Connect to Mongoose
     await mongoose.connect(process.env.MONGO_URI, {

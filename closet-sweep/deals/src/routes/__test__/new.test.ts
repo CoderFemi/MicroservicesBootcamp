@@ -1,6 +1,6 @@
 import request from 'supertest'
 import { app } from '../../app'
-import { Deal } from '../../../models/deal'
+import { Deal } from '../../models/deal'
 
 it('has a route handler listening to /api/deals for post requests', async () => {
     const response = await request(app)
