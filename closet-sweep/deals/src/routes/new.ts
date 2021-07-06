@@ -19,14 +19,12 @@ router.post('/api/deals', requireAuth, validateBody, validateRequest, async (req
         userId: req.currentUser!.id
     })
     await deal.save()
-    if (process.env.NODE_ENV !== 'test') {
-        await new DealCreatedPublisher(natsWrapper.client).publish({
-            id: deal.id,
-            title: deal.title,
-            price: deal.price,
-            userId: deal.userId
-        })
-    }
+    await new DealCreatedPublisher(natsWrapper.client).publish({
+        id: deal.id,
+        title: deal.title,
+        price: deal.price,
+        userId: deal.userId
+    })
     res.status(201).send(deal)
 })
 

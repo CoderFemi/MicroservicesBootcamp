@@ -7,6 +7,8 @@ import {
     NotAuthorisedError
 } from '@closetsweep/common'
 import { Deal } from '../models/deal'
+import { DealUpdatedPublisher } from '../events/publishers/deal-updated-publisher copy'
+import { natsWrapper } from '../nats-wrapper'
 
 const router = express.Router()
 const validateBody = [
@@ -27,6 +29,12 @@ router.put('/api/deals/:id', requireAuth, validateBody, validateRequest, async (
         price: req.body.price
     })
     await deal.save()
+    await new DealUpdatedPublisher(natsWrapper.client).publish({
+        id: deal.id,
+        title: deal.title,
+        price: deal.price,
+        userId: deal.userId
+    })
     res.send(deal)
 })
 

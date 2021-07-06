@@ -1,6 +1,8 @@
 import request from 'supertest'
 import { app } from '../../app'
 
+jest.mock('../../nats-wrapper')
+
 const createDeal = () => {
      return request(app)
         .post('/api/deals')

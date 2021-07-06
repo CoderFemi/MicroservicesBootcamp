@@ -1,6 +1,9 @@
 import request from 'supertest'
 import { app } from '../../app'
 import { Deal } from '../../models/deal'
+import { natsWrapper } from '../../nats-wrapper'
+
+jest.mock('../../nats-wrapper')
 
 it('has a route handler listening to /api/deals for post requests', async () => {
     const response = await request(app)
@@ -61,4 +64,17 @@ it('creates a deal with valid inputs', async () => {
     expect(deals.length).toEqual(1)
     expect(deals[0].price).toEqual(newDeal.price)
     expect(deals[0].title).toEqual(newDeal.title)
+})
+
+it('publishes an event', async () => {
+    const newDeal = {
+        title: 'title',
+        price: 250,
+    }
+    await request(app)
+        .post('/api/deals')
+        .set('Cookie', global.signin())
+        .send(newDeal)
+        .expect(201)
+    expect(natsWrapper.client.publish).toHaveBeenCalled()
 })
