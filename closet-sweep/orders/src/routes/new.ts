@@ -4,8 +4,8 @@ import { body } from 'express-validator'
 import { Order } from '../models/order'
 import { Deal } from '../models/deal'
 import { requireAuth, validateRequest, NotFoundError, OrderStatus, BadRequestError } from '@closetsweep/common'
-// import { orderCreatedPublisher } from '../events/publishers/order-created-publisher'
-// import { natsWrapper } from '../nats-wrapper'
+import { OrderCreatedPublisher } from '../events/publishers/order-created-publisher'
+import { natsWrapper } from '../nats-wrapper'
 
 const router = express.Router()
 
@@ -39,12 +39,16 @@ router.post('/api/orders', requireAuth, validateBody, validateRequest, async (re
         deal
     })
     await order.save()
-    // await new orderCreatedPublisher(natsWrapper.client).publish({
-    //     id: order.id,
-    //     title: order.title,
-    //     price: order.price,
-    //     userId: order.userId
-    // })
+    await new OrderCreatedPublisher(natsWrapper.client).publish({
+        id: order.id,
+        status: order.status,
+        userId: order.userId,
+        expiresAt: order.expiresAt.toISOString(), // Convert to UTC timezone format
+        deal: {
+            id: deal.id,
+            price: deal.price
+        }
+    })
     res.status(201).send(order)
 })
 
