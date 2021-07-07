@@ -1,10 +1,13 @@
 import express, { Request, Response } from 'express'
+import { requireAuth } from '@closetsweep/common'
 import { Order } from '../models/order'
 
 const router = express.Router()
 
-router.get('/api/orders', async (req: Request, res: Response) => {
-    const orders = await Order.find({})
+router.get('/api/orders', requireAuth, async (req: Request, res: Response) => {
+    const orders = await Order
+        .find({ userId: req.currentUser!.id })
+        .populate('deal')
     res.send(orders)
 })
 

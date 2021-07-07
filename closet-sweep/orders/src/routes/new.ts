@@ -9,6 +9,8 @@ import { requireAuth, validateRequest, NotFoundError, OrderStatus, BadRequestErr
 
 const router = express.Router()
 
+const EXPIRATION_WINDOW_SECONDS = 10 * 60
+
 const validateBody = [
     body('dealId')
         .not().isEmpty()
@@ -21,28 +23,29 @@ router.post('/api/orders', requireAuth, validateBody, validateRequest, async (re
     if (!deal) {
         throw new NotFoundError()
     }
-    const existingOrder = await Order.findOne({
-        deal: deal.id,
-        status: {
-            $in: [
-                OrderStatus.Created,
-                OrderStatus.AwaitingPayment,
-                OrderStatus.Complete
-            ]
-        }
-    })
-    if (existingOrder) {
+
+    const isReserved = await deal.isReserved()
+    if (isReserved) {
         throw new BadRequestError('Deal has already been taken.')
     }
-    
-    // await order.save()
+
+    const expiration = new Date()
+    expiration.setSeconds(expiration.getSeconds() + EXPIRATION_WINDOW_SECONDS)
+
+    const order = Order.build({
+        userId: req.currentUser!.id,
+        status: OrderStatus.Created,
+        expiresAt: expiration,
+        deal
+    })
+    await order.save()
     // await new orderCreatedPublisher(natsWrapper.client).publish({
     //     id: order.id,
     //     title: order.title,
     //     price: order.price,
     //     userId: order.userId
     // })
-    // res.status(201).send(order)
+    res.status(201).send(order)
 })
 
 export {router as createOrderRouter}

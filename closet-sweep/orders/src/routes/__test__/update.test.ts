@@ -1,123 +1,31 @@
 import request from 'supertest'
 import { app } from '../../app'
-import mongoose from 'mongoose'
-import { natsWrapper } from '../../nats-wrapper'
+import { Deal } from '../../models/deal'
+import { OrderStatus } from '@closetsweep/common'
+// import { natsWrapper } from '../../nats-wrapper'
 
-jest.mock('../../nats-wrapper')
-const id = new mongoose.Types.ObjectId().toHexString()
+// jest.mock('../../nats-wrapper')
 
-it('returns a 404 if the provided id does not exist', async () => {
-    await request(app)
-        .put(`/api/deals/${id}`)
-        .set('Cookie', global.signin())
-        .send({
-            title: 'Cooker',
-            price: 360
-        })
-        .expect(404)
-})
+it('cancels an order', async () => {
+    const deal = Deal.build({
+        title: 'Bedroom cabinet',
+        price: 200
+    })
+    await deal.save()
 
-it('returns a 401 if the user is not authenticated', async () => {
-    await request(app)
-        .put(`/api/deals/${id}`)
-        .send({
-            title: 'Cooker',
-            price: 360
-        })
-        .expect(401)
-})
-
-it('returns a 401 if the user does not own the deal', async () => {
-    const response = await request(app)
-        .post('/api/deals')
-        .set('Cookie', global.signin())
-        .send({
-            title: 'Grey Jeans',
-            price: 251
-        })
+    const user = global.signin()
+    const { body: order } = await request(app)
+        .post('/api/orders')
+        .set('Cookie', user)
+        .send({ dealId: deal.id })
+        .expect(201)
     
-    await request(app)
-        .put(`/api/deals/${response.body.id}`)
-        .set('Cookie', global.signin())
-        .send({
-            title: "Black Jeans",
-            price: 54
-        })
-        .expect(401)
-})
-
-it('returns a 400 if the user provides an invalid title or price', async () => {
-    const cookie = global.signin()
-    const response = await request(app)
-        .post('/api/deals')
-        .set('Cookie', cookie)
-        .send({
-            title: 'Grey Jeans',
-            price: 251
-        })
-    
-    await request(app)
-        .put(`/api/deals/${response.body.id}`)
-        .set('Cookie', cookie)
-        .send({
-            title: '',
-            price: 360
-        })
-        .expect(400)
-    
-    await request(app)
-        .put(`/api/deals/${response.body.id}`)
-        .set('Cookie', cookie)
-        .send({
-            title: 'Grey Jeans',
-            price: -360
-        })
-        .expect(400)
-    
-})
-
-it('returns a 200 if the provided inputs are valid', async () => {
-    const cookie = global.signin()
-    const response = await request(app)
-        .post('/api/deals')
-        .set('Cookie', cookie)
-        .send({
-            title: 'Grey Jeans',
-            price: 251
-        })
-    
-    await request(app)
-        .put(`/api/deals/${response.body.id}`)
-        .set('Cookie', cookie)
-        .send({
-            title: 'Jordan sneakers',
-            price: 700
-        })
+    const { body: updatedOrder } = await request(app)
+        .put(`/api/orders/${order.id}`)
+        .set('Cookie', user)
+        .send({ dealId: deal.id })
         .expect(200)
-    
-    const dealResponse = await request(app)
-        .get(`/api/deals/${response.body.id}`)
-    expect(dealResponse.body.title).toEqual('Jordan sneakers')
-    expect(dealResponse.body.price).toEqual(700)
+    expect(updatedOrder.status).toEqual(OrderStatus.Cancelled)
 })
 
-it('publishes an event', async () => {
-    const cookie = global.signin()
-    const response = await request(app)
-        .post('/api/deals')
-        .set('Cookie', cookie)
-        .send({
-            title: 'Grey Jeans',
-            price: 251
-        })
-
-    await request(app)
-        .put(`/api/deals/${response.body.id}`)
-        .set('Cookie', cookie)
-        .send({
-            title: 'Jordan sneakers',
-            price: 700
-        })
-        .expect(200)
-    expect(natsWrapper.client.publish).toHaveBeenCalled()
-})
+it.todo('publishes an order-cancelled event')

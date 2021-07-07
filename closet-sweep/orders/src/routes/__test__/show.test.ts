@@ -1,32 +1,48 @@
 import request from 'supertest'
 import mongoose from 'mongoose'
 import { app } from '../../app'
+import { Deal } from '../../models/deal'
 
-jest.mock('../../nats-wrapper')
+// jest.mock('../../nats-wrapper')
 
-it('returns a 404 if deal is not found', async () => {
-    const id = new mongoose.Types.ObjectId().toHexString()
+it('returns a 401 if order does not belong to user', async () => {
+    const deal = Deal.build({
+        title: 'Lawn mower',
+        price: 320
+    })
+    await deal.save()
+
+    const { body: order } = await request(app)
+        .post('/api/orders')
+        .set('Cookie', global.signin())
+        .send({ dealId: deal.id })
+        .expect(201)
+
     await request(app)
-        .get(`/api/deals/${id}`)
-        .send()
-        .expect(404)
+        .get(`/api/orders/${order.id}`)
+        .set('Cookie', global.signin())
+        .expect(401)
 })
 
-it('returns the deal if found', async () => {
-    const title = "Kitchen blender"
-    const price = 550
+it('fetches the order', async () => {
+    const deal = Deal.build({
+        title: 'Lawn mower',
+        price: 320
+    })
+    await deal.save()
 
-    const response = await request(app)
-        .post('/api/deals')
-        .set('Cookie', global.signin())
-        .send({
-            title, price
-        })
+    const user = global.signin()
+
+    const { body: order } = await request(app)
+        .post('/api/orders')
+        .set('Cookie', user)
+        .send({ dealId: deal.id })
         .expect(201)
     
-    const dealResponse = await request(app)
-        .get(`/api/deals/${response.body.id}`)
+    const { body: fetchedOrder } = await request(app)
+        .get(`/api/orders/${order.id}`)
+        .set('Cookie', user)
         .expect(200)
-    expect(dealResponse.body.title).toEqual(title)
-    expect(dealResponse.body.price).toEqual(price)
+    
+    expect(fetchedOrder.id).toEqual(order.id)
 })

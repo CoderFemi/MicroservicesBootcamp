@@ -1,4 +1,6 @@
 import mongoose from 'mongoose'
+import { OrderStatus } from '@closetsweep/common'
+import { Order } from './order'
 
 // Describes the properties required to create a new Deal
 interface DealAttrs {
@@ -15,6 +17,7 @@ interface DealModel extends mongoose.Model<DealDoc> {
 export interface DealDoc extends mongoose.Document {
   title: string
   price: number
+  isReserved(): Promise<boolean>
 }
 
 const dealSchema = new mongoose.Schema({
@@ -39,6 +42,19 @@ const dealSchema = new mongoose.Schema({
 
 dealSchema.statics.build = (attrs: DealAttrs) => {
   return new Deal(attrs)
+}
+dealSchema.methods.isReserved = async function () {
+  const existingOrder = await Order.findOne({
+    deal: this as any,
+    status: {
+      $in: [
+        OrderStatus.Created,
+        OrderStatus.AwaitingPayment,
+        OrderStatus.Complete
+      ]
+    }
+  })
+  return !!existingOrder
 }
 
 const Deal = mongoose.model<DealDoc, DealModel>('Deal', dealSchema)

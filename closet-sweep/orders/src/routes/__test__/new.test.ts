@@ -1,80 +1,54 @@
+import mongoose from 'mongoose'
 import request from 'supertest'
 import { app } from '../../app'
+import { Order } from '../../models/order'
 import { Deal } from '../../models/deal'
-import { natsWrapper } from '../../nats-wrapper'
+import { OrderStatus } from '@closetsweep/common'
+// import { natsWrapper } from '../../nats-wrapper'
 
-jest.mock('../../nats-wrapper')
+// jest.mock('../../nats-wrapper')
 
-it('has a route handler listening to /api/deals for post requests', async () => {
-    const response = await request(app)
-        .post('/api/deals')
-        .send({})
-    expect(response.status).not.toEqual(404)
-})
-
-it('can only be accessed if the user is signed in', async () => {
+it('returns an error if the deal does not exist', async () => {
+    const dealId = mongoose.Types.ObjectId()
     await request(app)
-        .post('/api/deals')
-        .send({})
-})
-
-it('does not return a status of 401 if the user is signed in', async () => {
-    const response = await request(app)
-        .post('/api/deals')
+        .post('/api/orders')
         .set('Cookie', global.signin())
-        .send({})
-    expect(response.status).not.toEqual(401)
+        .send({ dealId })
+        .expect(404)
+    
 })
 
-it('returns an error if an invalid deal title is provided', async () => {
+it('returns an error if the deal is already taken', async () => {
+    const deal = Deal.build({
+        title: 'Kitchen drawer',
+        price: 1200
+    })
+    await deal.save()
+    const order = Order.build({
+        deal,
+        userId: 'randomId1234',
+        status: OrderStatus.Created,
+        expiresAt: new Date()
+    })
+    await order.save()
     await request(app)
-        .post('/api/deals')
+        .post('/api/orders')
         .set('Cookie', global.signin())
-        .send({
-            title: '',
-            price: 200
-        })
+        .send({ dealId: deal.id })
         .expect(400)
 })
 
-it('returns an error if an invalid deal price is provided', async () => {
-    await request(app)
-        .post('/api/deals')
+it('reserves a deal', async () => {
+    const deal = Deal.build({
+        title: 'Kitchen drawer',
+        price: 1200
+    })
+    await deal.save()
+    const response = await request(app)
+        .post('/api/orders')
         .set('Cookie', global.signin())
-        .send({
-            title: 'title',
-            price: true
-        })
-        .expect(400)
+        .send({ dealId: deal.id })
+        .expect(201)
 })
 
-it('creates a deal with valid inputs', async () => {
-    let deals = await Deal.find({})
-    expect(deals.length).toEqual(0)
-    const newDeal = {
-        title: 'title',
-        price: 250,
-    }
-    await request(app)
-        .post('/api/deals')
-        .set('Cookie', global.signin())
-        .send(newDeal)
-        .expect(201)
-    deals = await Deal.find({})
-    expect(deals.length).toEqual(1)
-    expect(deals[0].price).toEqual(newDeal.price)
-    expect(deals[0].title).toEqual(newDeal.title)
-})
-
-it('publishes an event', async () => {
-    const newDeal = {
-        title: 'title',
-        price: 250,
-    }
-    await request(app)
-        .post('/api/deals')
-        .set('Cookie', global.signin())
-        .send(newDeal)
-        .expect(201)
-    expect(natsWrapper.client.publish).toHaveBeenCalled()
-})
+it.todo('emits an order created event')

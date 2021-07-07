@@ -5,7 +5,7 @@ import { errorHandler, NotFoundError, currentUser } from '@closetsweep/common'
 import { createOrderRouter } from './routes/new'
 import { showOrderRouter } from './routes/show'
 import { indexOrderRouter } from './routes'
-import { deleteOrderRouter } from './routes/delete'
+import { updateOrderRouter } from './routes/update'
 
 const app = express()
 app.set('trust proxy', true)
@@ -19,7 +19,7 @@ app.use(currentUser)
 app.use(createOrderRouter)
 app.use(showOrderRouter)
 app.use(indexOrderRouter)
-app.use(deleteOrderRouter)
+app.use(updateOrderRouter)
 
 app.get('*', () => {
     throw new NotFoundError()
