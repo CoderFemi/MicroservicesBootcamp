@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import { updateIfCurrentPlugin } from 'mongoose-update-if-current'
 
 // Describes the properties required to create a new Deal
 interface DealAttrs {
@@ -17,7 +18,7 @@ interface DealDoc extends mongoose.Document {
   title: string
   price: number
   userId: string
-
+  version: number
 }
 
 const dealSchema = new mongoose.Schema({
@@ -43,6 +44,17 @@ const dealSchema = new mongoose.Schema({
     }
   }
 )
+
+dealSchema.set('versionKey', 'version')
+dealSchema.plugin(updateIfCurrentPlugin)
+
+// Alternative versioning solution
+// dealSchema.pre('save', function (done) {
+//   this.$where = {
+//     version: this.get('version') - 1
+//   }
+//   done()
+// })
 
 dealSchema.statics.build = (attrs: DealAttrs) => {
   return new Deal(attrs)

@@ -33,7 +33,8 @@ router.put('/api/deals/:id', requireAuth, validateBody, validateRequest, async (
         id: deal.id,
         title: deal.title,
         price: deal.price,
-        userId: deal.userId
+        userId: deal.userId,
+        version: deal.version
     })
     res.send(deal)
 })

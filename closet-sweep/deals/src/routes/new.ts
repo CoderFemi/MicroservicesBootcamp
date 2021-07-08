@@ -23,7 +23,8 @@ router.post('/api/deals', requireAuth, validateBody, validateRequest, async (req
         id: deal.id,
         title: deal.title,
         price: deal.price,
-        userId: deal.userId
+        userId: deal.userId,
+        version: deal.version
     })
     res.status(201).send(deal)
 })

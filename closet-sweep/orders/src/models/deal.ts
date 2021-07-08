@@ -1,9 +1,11 @@
 import mongoose from 'mongoose'
 import { OrderStatus } from '@closetsweep/common'
 import { Order } from './order'
+import { updateIfCurrentPlugin } from 'mongoose-update-if-current'
 
 // Describes the properties required to create a new Deal
 interface DealAttrs {
+  id: string
   title: string
   price: number
 }
@@ -17,6 +19,7 @@ interface DealModel extends mongoose.Model<DealDoc> {
 export interface DealDoc extends mongoose.Document {
   title: string
   price: number
+  version: number
   isReserved(): Promise<boolean>
 }
 
@@ -40,8 +43,23 @@ const dealSchema = new mongoose.Schema({
   }
 )
 
+dealSchema.set('versionKey', 'version')
+dealSchema.plugin(updateIfCurrentPlugin)
+
+// Alternative versioning solution
+// dealSchema.pre('save', function (done) {
+//   this.$where = {
+//     version: this.get('version') - 1
+//   }
+//   done()
+// })
+
 dealSchema.statics.build = (attrs: DealAttrs) => {
-  return new Deal(attrs)
+  return new Deal({
+    _id: attrs.id,
+    title: attrs.title,
+    price: attrs.price
+  })
 }
 dealSchema.methods.isReserved = async function () {
   const existingOrder = await Order.findOne({
