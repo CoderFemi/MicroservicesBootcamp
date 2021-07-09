@@ -1,4 +1,5 @@
 import request from 'supertest'
+import mongoose from 'mongoose'
 import { app } from '../../app'
 import { Deal } from '../../models/deal'
 import { OrderStatus } from '@closetsweep/common'
@@ -6,6 +7,7 @@ import { natsWrapper } from '../../nats-wrapper'
 
 it('cancels an order', async () => {
     const deal = Deal.build({
+        id: mongoose.Types.ObjectId().toHexString(),
         title: 'Bedroom cabinet',
         price: 200
     })
@@ -28,6 +30,7 @@ it('cancels an order', async () => {
 
 it('publishes an order-cancelled event', async () => {
     const deal = Deal.build({
+        id: mongoose.Types.ObjectId().toHexString(),
         title: 'Bedroom cabinet',
         price: 200
     })

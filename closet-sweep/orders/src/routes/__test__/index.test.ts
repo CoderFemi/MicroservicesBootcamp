@@ -1,4 +1,5 @@
 import request from 'supertest'
+import mongoose from 'mongoose'
 import { app } from '../../app'
 import { Deal } from '../../models/deal'
 
@@ -6,6 +7,7 @@ import { Deal } from '../../models/deal'
 
 const buildDeal = async () => {
     const deal = Deal.build({
+        id: mongoose.Types.ObjectId().toHexString(),
         title: 'Bathroom mirror',
         price: 1500
     })

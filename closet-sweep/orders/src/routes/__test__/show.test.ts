@@ -7,6 +7,7 @@ import { Deal } from '../../models/deal'
 
 it('returns a 401 if order does not belong to user', async () => {
     const deal = Deal.build({
+        id: mongoose.Types.ObjectId().toHexString(),
         title: 'Lawn mower',
         price: 320
     })
@@ -26,6 +27,7 @@ it('returns a 401 if order does not belong to user', async () => {
 
 it('fetches the order', async () => {
     const deal = Deal.build({
+        id: mongoose.Types.ObjectId().toHexString(),
         title: 'Lawn mower',
         price: 320
     })

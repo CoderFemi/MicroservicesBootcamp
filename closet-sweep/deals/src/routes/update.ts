@@ -4,10 +4,11 @@ import {
     validateRequest,
     requireAuth,
     NotFoundError,
-    NotAuthorisedError
+    NotAuthorisedError,
+    BadRequestError
 } from '@closetsweep/common'
 import { Deal } from '../models/deal'
-import { DealUpdatedPublisher } from '../events/publishers/deal-updated-publisher copy'
+import { DealUpdatedPublisher } from '../events/publishers/deal-updated-publisher'
 import { natsWrapper } from '../nats-wrapper'
 
 const router = express.Router()
@@ -20,6 +21,9 @@ router.put('/api/deals/:id', requireAuth, validateBody, validateRequest, async (
     const deal = await Deal.findById(req.params.id)
     if (!deal) {
         throw new NotFoundError()
+    }
+    if (deal.orderId) {
+        throw new BadRequestError('Cannot edit a deal that has been taken')
     }
     if (deal.userId !== req.currentUser!.id) {
         throw new NotAuthorisedError()

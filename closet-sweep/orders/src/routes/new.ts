@@ -47,7 +47,8 @@ router.post('/api/orders', requireAuth, validateBody, validateRequest, async (re
         deal: {
             id: deal.id,
             price: deal.price
-        }
+        },
+        version: order.version
     })
     res.status(201).send(order)
 })

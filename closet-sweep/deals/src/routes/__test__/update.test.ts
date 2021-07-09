@@ -2,6 +2,7 @@ import request from 'supertest'
 import { app } from '../../app'
 import mongoose from 'mongoose'
 import { natsWrapper } from '../../nats-wrapper'
+import { Deal } from '../../models/deal'
 
 jest.mock('../../nats-wrapper')
 const id = new mongoose.Types.ObjectId().toHexString()
@@ -120,4 +121,28 @@ it('publishes an event', async () => {
         })
         .expect(200)
     expect(natsWrapper.client.publish).toHaveBeenCalled()
+})
+
+it('does not allow update if ticket is reserved', async () => {
+    const cookie = global.signin()
+    const response = await request(app)
+        .post('/api/deals')
+        .set('Cookie', cookie)
+        .send({
+            title: 'Grey Jeans',
+            price: 251
+        })
+    
+    const deal = await Deal.findById(response.body.id)
+    deal!.set({ orderId: mongoose.Types.ObjectId().toHexString() })
+    await deal!.save()
+
+    await request(app)
+        .put(`/api/deals/${response.body.id}`)
+        .set('Cookie', cookie)
+        .send({
+            title: 'Jordan sneakers',
+            price: 700
+        })
+        .expect(400)
 })

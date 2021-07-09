@@ -7,7 +7,7 @@ import { OrderStatus } from '@closetsweep/common'
 import { natsWrapper } from '../../nats-wrapper'
 
 it('returns an error if the deal does not exist', async () => {
-    const dealId = mongoose.Types.ObjectId()
+    const dealId = mongoose.Types.ObjectId().toHexString()
     await request(app)
         .post('/api/orders')
         .set('Cookie', global.signin())
@@ -18,6 +18,7 @@ it('returns an error if the deal does not exist', async () => {
 
 it('returns an error if the deal is already taken', async () => {
     const deal = Deal.build({
+        id: mongoose.Types.ObjectId().toHexString(),
         title: 'Kitchen drawer',
         price: 1200
     })
@@ -38,6 +39,7 @@ it('returns an error if the deal is already taken', async () => {
 
 it('reserves a deal', async () => {
     const deal = Deal.build({
+        id: mongoose.Types.ObjectId().toHexString(),
         title: 'Kitchen drawer',
         price: 1200
     })
@@ -51,6 +53,7 @@ it('reserves a deal', async () => {
 
 it('emits an order created event', async () => {
     const deal = Deal.build({
+        id: mongoose.Types.ObjectId().toHexString(),
         title: 'Kitchen drawer',
         price: 1200
     })

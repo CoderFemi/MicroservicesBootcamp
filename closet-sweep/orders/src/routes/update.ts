@@ -23,7 +23,8 @@ router.put('/api/orders/:orderId', requireAuth, async (req: Request, res: Respon
         id: order.id,
         deal: {
             id: order.deal.id
-        }
+        },
+        version: order.version
     })
     res.status(200).send(order)
 })
