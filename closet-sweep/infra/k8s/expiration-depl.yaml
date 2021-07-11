@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: expiration
-          image: coderfemi/expiration
+          image: us.gcr.io/closetsweep-dev/expiration
           env:
             - name: NATS_CLIENT_ID
               valueFrom:

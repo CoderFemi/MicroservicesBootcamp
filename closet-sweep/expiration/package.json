@@ -23,7 +23,7 @@
     "ts-jest": "^27.0.3"
   },
   "dependencies": {
-    "@closetsweep/common": "^1.0.13",
+    "@closetsweep/common": "^1.0.14",
     "@types/bull": "^3.15.2",
     "bull": "^3.22.11",
     "node-nats-streaming": "^0.3.2",

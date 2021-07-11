@@ -3,6 +3,7 @@ import { app } from './app'
 import { natsWrapper } from './nats-wrapper'
 import { DealCreatedListener } from './events/listeners/deal-created-listener'
 import { DealUpdatedListener } from './events/listeners/deal-updated-listener'
+import { ExpirationCompleteListener } from './events/listeners/expiration-complete-listener'
 
 const start = async () => {
   if (!process.env.JWT_KEY) {
@@ -35,6 +36,7 @@ const start = async () => {
     // Listen for events
     new DealCreatedListener(natsWrapper.client).listen()
     new DealUpdatedListener(natsWrapper.client).listen()
+    new ExpirationCompleteListener(natsWrapper.client).listen()
 
     // Connect to Mongoose
     await mongoose.connect(process.env.MONGO_URI, {

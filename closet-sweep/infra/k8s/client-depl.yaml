@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: client
-          image: coderfemi/client
+          image: us.gcr.io/closetsweep-dev/client
 ---
 apiVersion: v1
 kind: Service

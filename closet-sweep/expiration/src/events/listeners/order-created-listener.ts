@@ -1,14 +1,20 @@
 import { Message } from 'node-nats-streaming'
 import { Listener, OrderCreatedEvent, Subjects } from '@closetsweep/common'
 import { queueGroupName } from './queue-group-name'
-// import { Deal } from '../../models/deal'
-// import { DealUpdatedPublisher } from '../publishers/deal-updated-publisher'
+import { expirationQueue } from '../../queues/expiration-queue'
 
 export class OrderCreatedListener extends Listener<OrderCreatedEvent> {
     readonly subject = Subjects.OrderCreated
     queueGroupName = queueGroupName
+
     async onMessage(data: OrderCreatedEvent['data'], msg: Message) {
-     
+        const delay = new Date(data.expiresAt).getTime() - new Date().getTime()
+
+        await expirationQueue.add({
+            orderId: data.id
+        }, {
+            delay
+        })
 
         msg.ack()
     }
