@@ -22,7 +22,7 @@ const Signin = () => {
         setPassword('')
     }
     return (
-        <form className="w-50 m-auto" onSubmit={onSubmit}>
+        <form className="w-md-75" onSubmit={onSubmit}>
             <h1>Sign In</h1>
             {errors}
             <div className="form-group">

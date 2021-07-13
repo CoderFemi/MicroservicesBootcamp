@@ -406,7 +406,7 @@ Cluster IPs are used only within a namespace and cannot be reached from outside 
 
 Note that the initial fetch request can also be executed on the client. In this case, there is no need to include a domain name with the request url. If executed on the server, a FQDN, as explained above, is required. A conditional can be used to execute the request for the two scenarios above by checking if the `window` (browser) object is undefined.
 
-Next.js uses the `pages directory` for routing. This performs the exact function that the React Router component does. All the different routes are created as files in the pages directory, and are identified as routes by their particular file names.
+Next.js uses the `pages directory` for routing. This performs the exact function that the React Router component does. All the different routes are created as files in the pages directory, and are identified as routes by their particular file names. A route with a param is identified by wrapping the param with square brackets e.g. payments/[paymentId].js
 
 Next.js sometimes does not carry out reloading of files efficiently. When this problem is encountered, in order for it to auto-refresh the browser content when source files are changed, the following `next.config.js` file is created at the root level with the following content:
 
