@@ -27,7 +27,7 @@
     "ts-jest": "^27.0.3"
   },
   "dependencies": {
-    "@closetsweep/common": "^1.0.13",
+    "@closetsweep/common": "^1.0.15",
     "@types/cookie-session": "^2.0.42",
     "@types/jsonwebtoken": "^8.5.2",
     "cookie-session": "^1.4.0",
