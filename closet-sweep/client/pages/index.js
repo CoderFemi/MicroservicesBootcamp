@@ -16,7 +16,8 @@ const LandingPage = ({ currentUser, deals }) => {
     })
     return (
         <div>
-            <table className="table table-striped table-hover">
+            <h1>Deals Available</h1>
+            <table className="table table-striped table-hover w-50">
                 <thead>
                     <tr>
                         <th>Title</th>

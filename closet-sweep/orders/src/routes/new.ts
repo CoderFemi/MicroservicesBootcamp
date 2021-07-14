@@ -9,7 +9,7 @@ import { natsWrapper } from '../nats-wrapper'
 
 const router = express.Router()
 
-const EXPIRATION_WINDOW_SECONDS = 10 * 60
+const EXPIRATION_WINDOW_SECONDS = 3 * 60
 
 const validateBody = [
     body('dealId')

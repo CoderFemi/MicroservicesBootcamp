@@ -30,9 +30,9 @@ const NewDeal = () => {
         <div>
             <h1>Create a Deal</h1>
             {errors}
-            <form className="w-lg-50" onSubmit={onSubmit}>
-                <div className="form-group">
-                    <label htmlFor="title">Title</label>
+            <form className="w-50" onSubmit={onSubmit}>
+                <div className="form-group mb-3">
+                    <label className="form-label" htmlFor="title">Title</label>
                     <input
                         className="form-control"
                         id="title"
@@ -41,8 +41,8 @@ const NewDeal = () => {
                         onChange={(e) => setTitle(e.target.value)}
                     />
                 </div>
-                <div className="form-group">
-                    <label htmlFor="price">Price</label>
+                <div className="form-group mb-3">
+                    <label className="form-label" htmlFor="price">Price</label>
                     <input
                         className="form-control"
                         id="price"

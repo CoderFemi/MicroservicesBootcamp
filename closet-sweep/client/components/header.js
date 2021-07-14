@@ -8,9 +8,18 @@ const Header = ({ currentUser }) => (
             </Link>
             {
                 currentUser
-                    ?   <Link href="/auth/signout">
+                    ?
+                    <div className="nav d-flex align-items-center">
+                        <Link href="/deals/new">
+                            <a className="nav-link">Post Deal</a>
+                        </Link>
+                        <Link href="/orders">
+                            <a className="nav-link">My Orders</a>
+                        </Link>
+                        <Link href="/auth/signout">
                             <a className="nav-link">Sign Out</a>
                         </Link>
+                    </div>
                     :
                         <div className="nav d-flex align-items-center">
                             <Link href="/auth/signup">

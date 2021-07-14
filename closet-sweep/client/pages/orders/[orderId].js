@@ -1,8 +1,18 @@
 import { useEffect, useState } from "react"
 import useRequest from "../../hooks/use-request"
+import StripeCheckout from 'react-stripe-checkout'
+import Router from "next/router"
 
-const OrderShow = ({ order }) => {
+const OrderShow = ({ order, currentUser }) => {
     const [timeLeft, setTimeLeft] = useState('')
+    const { doRequest, errors } = useRequest({
+        url: '/api/payments',
+        method: 'post',
+        body: {
+            orderId: order.id
+        },
+        onSuccess: () => Router.push('/orders')
+    })
     useEffect(() => {
         const findTimeLeft = () => {
             const milliseconds = new Date(order.expiresAt) - new Date()
@@ -17,26 +27,39 @@ const OrderShow = ({ order }) => {
             clearInterval(timerId)
         }
     }, [])
-    const { doRequest, errors } = useRequest({
-        url: '/api/payments',
-        method: 'post',
-        body: {
-            token: 'tok_visa',
-            orderId: order.id
-        },
-        onSuccess: (paymentId) => console.log(paymentId)
-    })
     return (
         <div>
+            <h1>My Order Details</h1>
             {errors}
+            <table className="table w-50">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{order.deal.title}</td>
+                        <td>{order.deal.price}</td>
+                    </tr>
+                </tbody>
+            </table>
             {
                 timeLeft > 0
-                    ? <small className="text-info"><strong>Time left to pay: {timeLeft} seconds</strong></small>
-                    : <div className="text-warning"><strong>Order for {order.deal.title} has expired.</strong></div>
+                    ?   <div className="text-info">
+                            <p><strong>Time left to pay: {timeLeft} seconds</strong></p>
+                            <StripeCheckout
+                                token={({ id }) => doRequest({ token: id })}
+                                stripeKey="pk_test_51JCj6ZKzFMtjcQnntQ6zNQqtl0gqSOK2DpINznvTvXuNRvWG9Q7RFYAn6ZmvZ0kPiNaIGmk04Xc6CSHdJ3TkkBgg00ZmKq3sJF"
+                                amount={order.deal.price * 100}
+                                email={currentUser.email}
+                            />
+                        </div>
+                    :   <div className="text-warning">
+                            <strong>Order for {order.deal.title} has expired.</strong>
+                        </div>
             }
-            <h1>{order.deal.title}</h1>
-            <h4>{order.deal.price}</h4>
-            <button onClick={doRequest} className="btn btn-primary" disabled={timeLeft <= 0}>Pay</button>
         </div>
     )
 }

@@ -25,12 +25,12 @@ const Signin = () => {
         <form className="w-md-75" onSubmit={onSubmit}>
             <h1>Sign In</h1>
             {errors}
-            <div className="form-group">
-                <label htmlFor="email">Email Address</label>
+            <div className="form-group mb-3">
+                <label className="form-label" htmlFor="email">Email Address</label>
                 <input type="email" id="email" value={email} onChange={e => setEmail(e.target.value)} className="form-control" />
             </div>
-            <div className="form-group">
-                <label htmlFor="password">Password</label>
+            <div className="form-group mb-3">
+                <label className="form-label" htmlFor="password">Password</label>
                 <input type="password" id="password" value={password} onChange={e => setPassword(e.target.value)} className="form-control" />
             </div>
             <button className="btn btn-primary">Sign In</button>

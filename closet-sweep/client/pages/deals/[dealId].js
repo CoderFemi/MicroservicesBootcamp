@@ -13,9 +13,21 @@ const DealShow = ({ deal }) => {
     return (
         <div>
             {errors}
-            <h1>{deal.title}</h1>
-            <h4>{deal.price}</h4>
-            <button onClick={doRequest} className="btn btn-primary">Purchase</button>
+            <table className="table w-50">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{deal.title}</td>
+                        <td>{deal.price}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <button onClick={() => doRequest()} className="btn btn-primary">Purchase</button>
         </div>
     )
 }

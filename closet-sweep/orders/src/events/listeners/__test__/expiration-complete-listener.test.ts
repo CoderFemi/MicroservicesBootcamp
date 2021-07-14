@@ -8,18 +8,19 @@ import { OrderStatus, ExpirationCompleteEvent } from '@closetsweep/common'
 
 const setup = async () => {
     const listener = new ExpirationCompleteListener(natsWrapper.client)
-    const deal = await Deal.build({
-        id: new mongoose.Types.ObjectId().toHexString(),
+    const deal = Deal.build({
+        id: mongoose.Types.ObjectId().toHexString(),
         title: 'Microwave Oven',
         price: 1250
     })
     await deal.save()
-    const order = await Order.build({
+    const order = Order.build({
         status: OrderStatus.Created,
         userId: '12345',
         expiresAt: new Date(),
         deal
     })
+    await order.save()
     const data: ExpirationCompleteEvent['data'] = {
         orderId: order.id
     }
@@ -40,7 +41,7 @@ it('updates the order status to cancelled', async () => {
 it('emits an OrderCancelled event', async () => {
     const { listener, order, data, msg } = await setup()
     await listener.onMessage(data, msg)
-    const eventData = (natsWrapper.client.publish as jest.Mock).mock.calls[0][1]
+    const eventData = JSON.parse((natsWrapper.client.publish as jest.Mock).mock.calls[0][1])
     expect(eventData.id).toEqual(order.id)
 })
 
