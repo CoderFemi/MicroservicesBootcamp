@@ -1,0 +1,15 @@
+name: closetsweep-tests
+on: pull_request
+jobs:
+  test:
+    name: PR Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: { dir: ['closetsweep/auth', 'closetsweep/client', 'closetsweep/deals', 'closetsweep/orders', 'closetsweep/payments'] }
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests for each service
+        working-directory: ${{ matrix.dir }}
+        run: | 
+          npm install
+          npm run test:ci
