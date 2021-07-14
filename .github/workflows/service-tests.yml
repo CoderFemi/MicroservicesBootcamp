@@ -11,5 +11,6 @@ jobs:
       - name: Run tests for each service
         working-directory: ${{ matrix.dir }}
         run: | 
+          pwd
           npm install
           npm run test:ci
