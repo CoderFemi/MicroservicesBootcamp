@@ -9,11 +9,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       
-      - name: Open Working Directory
-        working-directory: ${{ matrix.dir }}
-        run: ls -la
+#       - name: Open Working Directory
+#         working-directory: ${{ matrix.dir }}
+#         run: ls -la
         
       - name: Run Tests
         run: | 
+          cd ${{ matrix.dir }}
           npm install
           npm run test:ci
