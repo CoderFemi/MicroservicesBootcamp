@@ -5,6 +5,7 @@ jobs:
     name: PR Test
     runs-on: ubuntu-latest
     strategy:
+      max-parallel: 5
       matrix: { dir: [closet-sweep/auth, closet-sweep/expiration, closet-sweep/deals, closet-sweep/orders, closet-sweep/payments] }
     steps:
       - uses: actions/checkout@v2
