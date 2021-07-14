@@ -467,6 +467,44 @@ There is always the possibility that a record is saved to the database, but not 
 ### Optimistic Concurrency Control
 Events may not be processed by listening services in the correct order in which they were emitted. This is applicable with update events. Anytime an existing resource is updated, a version number assigned to it is incremented to reflect the update. This ensures that all updates are processed in the order of their version numbers. If event-v3 is received before event-v2, the business logic ensures that v3 is suspended until v2 is received and processed. Mongoose and MongoDB provides this versioning feature which works with the `mongoose-update-if-current` library. Only the primary service which publishes the event should increment the version number.
 
+## Continuous Integration/Development
+Github is the popular repository management site used by most developers. It enables teams to work on the same codebase at once and manages any conflicts that may arise. There are two approaches to working with repositories:
+- Mono-Repo Approach: Here one repository is used to track changes to all the different services. This is the most used approach as it reduces the amount of overhead associated with managing a repository.
+- Repo-Per-Service Approach: All services have separate repositories.
+### Github Actions
+Github Actions carries out a specific action anytime an event occurs on the repository. An event could be code pushed, pull request opened, pull request closed or repository forked etc. An action is simply a script that runs commands that we specify. When changes are pushed to a new branch and a pull request opened, any action specified for a pull request would run. When pushing subsequent changes on the same branch, they would be added to that same PR, as long as it has not been closed. No need to open a new one, unless it's a different branch. Below is the workflow format for running tests after a PR.
+```
+name: tests
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow pull request events but only for the main branch
+  pull_request:
+    branches: [ main ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      # Runs a single command using the runners shell
+      - name: Run auth service tests
+        run: cd closet-sweep/auth && npm install && npm run test:ci
+
+      # Runs a set of commands using the runners shell
+      - name: Run deals and payments services tests
+        run: |
+          cd deals && npm install && npm run test:ci
+          cd payments && npm install && npm run test:ci
+```
+This runs the tests sequentially. A matrix setup is more preferable in order to run jobs in parallel to save time.
+
 ## Other Notes
 - Formatting JSON properties: Javascript provides a way to modify/transform our JSON objects when using JSON.stringify(). It can also be implemented in our Mongoose schemas to suppress some fields (e.g. password fields) from being returned to the client. The following code changes the id key, removes the password and versionKey fields.
 
