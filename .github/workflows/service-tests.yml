@@ -5,7 +5,7 @@ jobs:
     name: PR Test
     runs-on: ubuntu-latest
     strategy:
-      matrix: { dir: ['closetsweep/auth', 'closetsweep/expiration', 'closetsweep/deals', 'closetsweep/orders', 'closetsweep/payments'] }
+      matrix: { dir: ['/closetsweep/auth', '/closetsweep/expiration', '/closetsweep/deals', '/closetsweep/orders', '/closetsweep/payments'] }
     steps:
       - uses: actions/checkout@v2
       - name: Run tests for each service
