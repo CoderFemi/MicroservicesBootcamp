@@ -503,7 +503,28 @@ jobs:
           cd deals && npm install && npm run test:ci
           cd payments && npm install && npm run test:ci
 ```
-This runs the tests sequentially. A matrix setup is more preferable in order to run jobs in parallel to save time.
+This runs the tests sequentially. On the other hand, different workflow files can simply be setup for the different test suites we want to run. A matrix setup can also be configured to run jobs in parallel.
+
+```
+name: closetsweep-tests
+on: pull_request
+jobs:
+  test:
+    name: PR Test
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 5
+      matrix: { dir: [closet-sweep/auth, closet-sweep/expiration, closet-sweep/deals, closet-sweep/orders, closet-sweep/payments] }
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Run Tests
+        working-directory: ${{ matrix.dir }}
+        run: |
+          npm install
+          npm run test:ci
+
+```
 
 ## Other Notes
 - Formatting JSON properties: Javascript provides a way to modify/transform our JSON objects when using JSON.stringify(). It can also be implemented in our Mongoose schemas to suppress some fields (e.g. password fields) from being returned to the client. The following code changes the id key, removes the password and versionKey fields.
