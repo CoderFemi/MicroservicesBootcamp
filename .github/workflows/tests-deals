@@ -1,0 +1,13 @@
+name: tests-deals
+
+on:
+  pull_request
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Run auth service tests
+        run: cd closet-sweep/deals && npm install && npm run test:ci
