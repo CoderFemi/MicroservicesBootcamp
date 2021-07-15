@@ -1,7 +1,9 @@
 name: tests-deals
 
 on:
-  pull_request
+  pull_request:
+    paths:
+      - 'closet-sweep/deals/**'
 
 jobs:
   build:
