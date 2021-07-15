@@ -2,7 +2,7 @@ name: deploy-auth
 on:
   push:
     branches:
-      - master
+      - main
     paths:
       - 'closet-sweep/auth/**'
 
