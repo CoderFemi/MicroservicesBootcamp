@@ -1,5 +1,5 @@
 name: deploy-auth
-on: 
+on:
   push:
     branches:
       - master
