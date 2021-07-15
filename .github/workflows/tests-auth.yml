@@ -1,0 +1,19 @@
+name: tests-auth
+
+on:
+  pull_request
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Run auth service tests
+        run: cd closet-sweep/auth && npm install && npm run test:ci
+
+      # Runs a set of commands using the runners shell
+#       - name: Run deals and payments services tests
+#         run: |
+#           cd deals && npm install && npm run test:ci
+#           cd payments && npm install && npm run test:ci
